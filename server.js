@@ -91,7 +91,7 @@ const server=http.createServer(async(req,res)=>{try{
   if(!secureRequest(req))return json(res,426,{error:'HTTPS required for Family Home sign-in'});
   const ip=req.socket.remoteAddress||'unknown',now=Date.now(),recent=(attempts.get(ip)||[]).filter(t=>now-t<600000);
   if(recent.length>=5)return json(res,429,{error:'Too many attempts'});
-  const data=await body(req),user=db.users.find(u=>u.username===data.username&&u.enabled!==false&&(!u.expires_at||Date.parse(u.expires_at)>now));
+  const data=await body(req),user=db.users.find(u=>u.username===String(data.username??'').trim().toLowerCase()&&u.enabled!==false&&(!u.expires_at||Date.parse(u.expires_at)>now));
   if(!user||typeof data.password!=='string'||!userPasswordMatches(data.password,user.password_hash)){
    recent.push(now);attempts.set(ip,recent);return json(res,401,{error:'Invalid credentials'});
   }
