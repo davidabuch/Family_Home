@@ -65,6 +65,7 @@ async function command(id,action,value){
  }
 }
 function applyProfile(me){
+ $('signedInProfile').classList.remove('hide');
  const profile=me.profile||{rooms:[]};
  permissions=Object.fromEntries(profile.rooms.flatMap(r=>r.devices.map(d=>[d.entity_id,d.actions])));
  const app=$('app'),nav=app.querySelector('.tabs');
