@@ -79,7 +79,7 @@ function applyProfile(me){
   section.append(title,grid);app.insertBefore(section,pool);
   groups[gridId]=room.devices.map(d=>[d.name,d.entity_id,'']);
  }
- if(me.role!=='admin'&&me.username!=='alexis'){poolTab.classList.add('hide');pool.classList.add('hide')}
+ if(me.role!=='admin'&&me.username.toLowerCase()!=='alexis'){poolTab.classList.add('hide');pool.classList.add('hide')}
  const first=nav.querySelector('button:not(.hide)');
  if(first){first.classList.add('active');$(first.dataset.tab)?.classList.add('active')}
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
