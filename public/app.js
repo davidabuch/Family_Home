@@ -86,6 +86,9 @@ function applyProfile(me){
   document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));
   document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));
  });
+ if(me.role==='admin'){
+  const menu=$('profileMenu'),link=document.createElement('a');link.href='/admin.html';link.textContent='Manage Home';link.className='btn';menu.prepend(link);
+ }
  const h=document.querySelector('h1');h.textContent=(me.display_name||me.username)+"'s Home";
  $('profileButton').textContent=(me.display_name||me.username).charAt(0).toUpperCase();
 }
