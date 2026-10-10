@@ -20,14 +20,14 @@ const dbPath=process.env.FAMILY_HOME_DB_PATH||'/data/family-home.json';
 const {db,migrated}=await loadDatabase(dbPath,username);
 if(migrated){
  // Existing Alexis account retains her original password through migration.
- db.users.push({id:username,username,display_name:'Alexis',role:'member',password_hash:'legacy:'+passHash,enabled:true});
+ db.users.push({id:username,username,display_name:'Alexis',role:'member',password_hash:'legacy:'+passHash,enabled:true,remote_access:false});
  await saveDatabase(dbPath,db);
 }
 const adminName=process.env.FAMILY_HOME_ADMIN_USERNAME||'';
 const adminPassword=process.env.FAMILY_HOME_ADMIN_PASSWORD||'';
 if(!db.users.some(u=>u.role==='admin')&&adminName&&adminPassword.length>=12){
  if(db.users.some(u=>u.username===adminName))throw Error('Administrator username conflicts with existing account');
- db.users.push({id:randomBytes(16).toString('hex'),username:adminName,display_name:'Family Administrator',role:'admin',password_hash:passwordHash(adminPassword),enabled:true});
+ db.users.push({id:randomBytes(16).toString('hex'),username:adminName,display_name:'Family Administrator',role:'admin',password_hash:passwordHash(adminPassword),enabled:true,remote_access:false});
  await persist();
 }
 function userPasswordMatches(password,stored){
