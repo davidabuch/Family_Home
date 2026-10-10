@@ -56,7 +56,7 @@ async function haRequest(path,method='GET',payload){const response=await fetch(h
 function isSameOrigin(req){const origin=req.headers.origin;const host=req.headers.host;return !origin||new URL(origin).host===host}
 const server=http.createServer(async(req,res)=>{try{
  const url=new URL(req.url,'http://localhost');const path=url.pathname;
- if(req.method==='GET'&&['/','/index.html','/manifest.webmanifest','/app.js'].includes(path)){const name=path==='/manifest.webmanifest'?'manifest.webmanifest':path==='/app.js'?'app.js':'index.html';const data=await readFile(new URL('./public/'+name,import.meta.url));res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.js')?'text/javascript; charset=utf-8':'application/manifest+json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(data);return}
+ if(req.method==='GET'&&['/','/index.html','/manifest.webmanifest','/app.js','/admin.html','/admin.js'].includes(path)){const name=path==='/manifest.webmanifest'?'manifest.webmanifest':path==='/app.js'?'app.js':path==='/admin.html'?'admin.html':path==='/admin.js'?'admin.js':'index.html';const data=await readFile(new URL('./public/'+name,import.meta.url));res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.js')?'text/javascript; charset=utf-8':'application/manifest+json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(data);return}
  if(path==='/api/health'&&req.method==='GET')return json(res,200,{ok:true});
  if(path==='/api/login'&&req.method==='POST'){
   if(!isSameOrigin(req))return json(res,403,{error:'Origin rejected'});
@@ -81,6 +81,12 @@ const server=http.createServer(async(req,res)=>{try{
  if(path==='/api/admin/users'&&req.method==='GET'){
   if(session.user.role!=='admin')return json(res,403,{error:'Administrator required'});
   return json(res,200,{users:listUsers(db,session.user)});
+ }
+ if(path==='/api/admin/profile'&&req.method==='GET'){
+  if(session.user.role!=='admin')return json(res,403,{error:'Administrator required'});
+  const userId=url.searchParams.get('user_id');
+  if(!db.users.some(u=>u.id===userId))return json(res,404,{error:'User not found'});
+  return json(res,200,{profile:db.profiles[userId]||{rooms:[]}});
  }
  if(path==='/api/admin/entities'&&req.method==='GET'){
   if(session.user.role!=='admin')return json(res,403,{error:'Administrator required'});
