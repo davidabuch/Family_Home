@@ -14,6 +14,7 @@ const username=process.env.FAMILY_HOME_USERNAME||'alexis';
 const passHash=process.env.FAMILY_HOME_PASSWORD_HASH||'';
 if(!ha||!token||secret.length<32||!passHash)throw Error('Configure HA_URL, HA_TOKEN, SESSION_SECRET and FAMILY_HOME_PASSWORD_HASH before starting.');
 const attempts=new Map();
+const trustedProxyAddresses=new Set((process.env.FAMILY_HOME_TRUSTED_PROXY_IPS||'').split(',').map(x=>x.trim()).filter(Boolean));
 const dbPath=process.env.FAMILY_HOME_DB_PATH||'/data/family-home.json';
 const {db,migrated}=await loadDatabase(dbPath,username);
 if(migrated){
@@ -38,7 +39,7 @@ function userPasswordMatches(password,stored){
 }
 function secureRequest(req){
  // Trust proxy forwarding only when explicitly configured with a trusted proxy.
- return Boolean(req.socket.encrypted)||(process.env.FAMILY_HOME_TRUST_PROXY==='1'&&req.headers['x-forwarded-proto']==='https');
+ return Boolean(req.socket.encrypted)||(trustedProxyAddresses.has(req.socket.remoteAddress)&&req.headers['x-forwarded-proto']==='https');
 }
 function getSession(req){
  const sid=cookies(req).fh_session;
@@ -76,7 +77,7 @@ const server=http.createServer(async(req,res)=>{try{
  if(path==='/api/me'&&req.method==='GET')return json(res,200,{username:session.user.username,display_name:session.user.display_name,role:session.user.role,csrf:session.csrf,profile:db.profiles[session.user.id]||{rooms:[]}});
  if(path==='/api/logout'&&req.method==='POST'){if(!isSameOrigin(req)||req.headers['x-csrf-token']!==session.csrf)return json(res,403,{error:'Forbidden'});db.sessions=db.sessions.filter(s=>s.id!==session.id);await persist();return json(res,200,{ok:true},{'Set-Cookie':'fh_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0'})}
  if(path==='/api/states'&&req.method==='GET'){const states=await haRequest('states');return json(res,200,{states:states.filter(s=>profileEntities(db.profiles[session.user.id]||{rooms:[]}).has(s.entity_id)).map(s=>({entity_id:s.entity_id,state:s.state,attributes:{friendly_name:s.attributes?.friendly_name,current_position:s.attributes?.current_position,supported_features:s.attributes?.supported_features,supported_color_modes:s.attributes?.supported_color_modes,brightness:s.attributes?.brightness,percentage:s.attributes?.percentage,percentage_step:s.attributes?.percentage_step,device_class:s.attributes?.device_class}}))})}
- if(path==='/api/action'&&req.method==='POST'){if(!isSameOrigin(req)||req.headers['x-csrf-token']!==session.csrf)return json(res,403,{error:'Forbidden'});const {entity_id,action,value}=await body(req);if(typeof entity_id!=='string'||typeof action!=='string'||!permitted(db.profiles[session.user.id],entity_id,action))return json(res,403,{error:'Action not permitted'});const service=serviceFor(entity_id,action)||{domain:entity_id.split('.')[0],service:action==='set_brightness'?'turn_on':action==='set_position'?'set_cover_position':action};const payload={entity_id};if(action==='set_brightness'||action==='set_position'||action==='set_percentage'){if(!Number.isInteger(value)||value<1&&action==='set_brightness'||value<0||value>100)return json(res,400,{error:'Position/brightness must be an integer from 0 to 100 (brightness 1 to 100)'});if(action==='set_brightness')payload.brightness_pct=value;else if(action==='set_percentage')payload.percentage=value;else payload.position=value;}await haRequest('services/'+service.domain+'/'+service.service,'POST',payload);return json(res,200,{ok:true})}
+ if(path==='/api/action'&&req.method==='POST'){if(!isSameOrigin(req)||req.headers['x-csrf-token']!==session.csrf)return json(res,403,{error:'Forbidden'});const {entity_id,action,value}=await body(req);if(typeof entity_id!=='string'||typeof action!=='string'||!permitted(db.profiles[session.user.id],entity_id,action))return json(res,403,{error:'Action not permitted'});const live=await haRequest('states/'+encodeURIComponent(entity_id));if(!allowedActions(entity_id,live.attributes).includes(action))return json(res,403,{error:'Action unavailable for device'});const service=serviceFor(entity_id,action)||{domain:entity_id.split('.')[0],service:action==='set_brightness'?'turn_on':action==='set_position'?'set_cover_position':action};const payload={entity_id};if(action==='set_brightness'||action==='set_position'||action==='set_percentage'){if(!Number.isInteger(value)||value<1&&action==='set_brightness'||value<0||value>100)return json(res,400,{error:'Position/brightness must be an integer from 0 to 100 (brightness 1 to 100)'});if(action==='set_brightness')payload.brightness_pct=value;else if(action==='set_percentage')payload.percentage=value;else payload.position=value;}await haRequest('services/'+service.domain+'/'+service.service,'POST',payload);return json(res,200,{ok:true})}
  if(path==='/api/admin/users'&&req.method==='GET'){
   if(session.user.role!=='admin')return json(res,403,{error:'Administrator required'});
   return json(res,200,{users:listUsers(db,session.user)});
