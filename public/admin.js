@@ -45,7 +45,15 @@ function drawRooms(){
    const text=document.createElement('span');text.textContent=device.name+' · '+device.entity_id;
    const rename=document.createElement('input');rename.value=device.name;rename.maxLength=70;rename.setAttribute('aria-label','Accessory display name');rename.oninput=()=>device.name=rename.value;
    const del=document.createElement('button');del.className='danger';del.textContent='Remove';del.onclick=()=>{room.devices.splice(di,1);drawRooms()};
-   line.append(text,rename,del);box.append(line);
+   const allowed=entities.find(e=>e.entity_id===device.entity_id)?.actions||device.actions;
+   const permissions=document.createElement('div');permissions.className='muted';
+   for(const action of allowed){
+    const label=document.createElement('label');label.style.display='inline-flex';label.style.alignItems='center';label.style.marginRight='12px';
+    const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.style.width='auto';checkbox.checked=device.actions.includes(action);
+    checkbox.onchange=()=>{device.actions=checkbox.checked?[...new Set([...device.actions,action])]:device.actions.filter(a=>a!==action)};
+    label.append(checkbox,document.createTextNode(' '+action.replaceAll('_',' ')));permissions.append(label);
+   }
+   line.append(text,rename,permissions,del);box.append(line);
   }
   const picker=document.createElement('select');picker.append(option('','Select accessory to add'));
   const assigned=new Set(profile.rooms.flatMap(r=>r.devices.map(d=>d.entity_id)));
