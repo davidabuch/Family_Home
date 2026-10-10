@@ -25,6 +25,8 @@ if(migrated){
 }
 const adminName=process.env.FAMILY_HOME_ADMIN_USERNAME||'';
 const adminPassword=process.env.FAMILY_HOME_ADMIN_PASSWORD||'';
+// Non-sensitive bootstrap diagnostic; never log passwords, hashes or session secrets.
+console.info('Family Home admin bootstrap:',JSON.stringify({configured:!!adminName,password_supplied:adminPassword.length>=12,existing_admin_count:db.users.filter(u=>u.role==='admin').length,configured_username_matches_existing_admin:db.users.some(u=>u.role==='admin'&&u.username===adminName)}));
 if(!db.users.some(u=>u.role==='admin')&&adminName&&adminPassword.length>=12){
  if(db.users.some(u=>u.username===adminName))throw Error('Administrator username conflicts with existing account');
  db.users.push({id:randomBytes(16).toString('hex'),username:adminName,display_name:'Family Administrator',role:'admin',password_hash:passwordHash(adminPassword),enabled:true,remote_access:false});
