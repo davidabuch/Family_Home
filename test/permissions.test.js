@@ -4,3 +4,6 @@ test('no cabinet light access',()=>assert.equal(authorize('light.kitchen_cabinet
 test('window sensors are read-only',()=>{for(const e of READ_ONLY)assert.equal(authorize(e,'turn_on'),false)});
 test('no broad services',()=>{assert.equal(authorize('light.kitchen_kitchen_main_lights','toggle'),false);assert.equal(serviceFor('light.kitchen_cabinet_lights','turn_on'),null)});
 test('every readable entity has a fixed ID',()=>assert.ok(VISIBLE.every(e=>/^[a-z_]+\.[a-z0-9_]+$/.test(e))));
+
+test('dimming limited to supported light entities',()=>{assert.equal(authorize('light.alexis_room_alexis_room_main_lights','set_brightness'),true);assert.equal(authorize('light.alexis_room_alexis_bathroom_lights','set_brightness'),false);assert.deepEqual(serviceFor('light.kitchen_kitchen_main_lights','set_brightness'),{domain:'light',service:'turn_on'})});
+test('shade positioning allowed only for approved cover',()=>{assert.equal(authorize('cover.alexis_window_shade','set_position'),true);assert.equal(authorize('cover.unapproved','set_position'),false);assert.deepEqual(serviceFor('cover.alexis_window_shade','set_position'),{domain:'cover',service:'set_cover_position'})});
