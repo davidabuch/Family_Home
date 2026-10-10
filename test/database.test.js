@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,writeFile,rm,stat} from 'node:fs/promises';
+import {mkdtemp,readFile,writeFile,rm,stat,copyFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {loadDatabase,saveDatabase,backupDatabase} from '../lib/database.js';
@@ -45,5 +45,23 @@ test('database backup preserves content and private permissions',async()=>{
   assert.deepEqual(JSON.parse(await readFile(backup,'utf8')),db);
   assert.equal((await stat(backup)).mode&0o777,0o600);
   assert.equal((await stat(file)).mode&0o777,0o600);
+ }finally{await rm(dir,{recursive:true,force:true})}
+});
+
+test('backup can restore original profile after a bad update',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'family-home-'));
+ try{
+  const file=join(dir,'db.json');
+  const {db}=await loadDatabase(file,'alexis');
+  db.users.push({id:'alexis',username:'alexis',role:'member',password_hash:'legacy:hash',enabled:true});
+  await saveDatabase(file,db);
+  const backup=await backupDatabase(file);
+  db.profiles.alexis.rooms=[];
+  await saveDatabase(file,db);
+  await copyFile(backup,file);
+  const restored=await loadDatabase(file,'alexis');
+  assert.equal(restored.migrated,false);
+  assert.equal(restored.db.profiles.alexis.rooms.length,3);
+  assert.equal(restored.db.users[0].password_hash,'legacy:hash');
  }finally{await rm(dir,{recursive:true,force:true})}
 });
