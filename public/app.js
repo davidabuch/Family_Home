@@ -14,9 +14,10 @@ function render(){
    const dimmable=light&&state?.attributes?.supported_color_modes?.some(m=>m!=='onoff');
    const positional=cover&&Boolean((state?.attributes?.supported_features??0)&4);
    const adjustable=Boolean(dimmable||positional||fan);
-   const symbol=cover?'▤':fan?'◉':id.includes('night')?'☾':light?'●':'◌';
-   const tile=document.createElement('div');tile.className='tile'+(active?' on':'');
-   const toggle=document.createElement('button');toggle.className='tileIcon';toggle.textContent=symbol;toggle.disabled=!available;
+   const kind=cover?'shade':fan?'fan':light?'light':'switch';
+   const glyph=cover?'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M5 8h14M5 12h14M5 16h14"/>':fan?'<circle cx="12" cy="12" r="2.1"/><path d="M12 9.5c-3-7 5-8 6-3 .4 2-1.7 4-3.5 4.8M14.5 12c7-3 8 5 3 6-2 .4-4-1.7-4.8-3.5M12 14.5c3 7-5 8-6 3-.4-2 1.7-4 3.5-4.8M9.5 12c-7 3-8-5-3-6 2-.4 4 1.7 4.8 3.5"/>':light?'<path class="bulb-fill" d="M9 18h6l.4-2.3c.3-1.4 1.1-2.1 2-3.4A7 7 0 1 0 6.6 12.3c.9 1.3 1.7 2 2 3.4L9 18Z"/><path d="M9 20h6M10 22h4"/>':'<circle cx="12" cy="12" r="8"/><path d="M12 5v7"/>';
+   const tile=document.createElement('div');tile.className='tile'+(active?' on':'');tile.dataset.kind=kind;
+   const toggle=document.createElement('button');toggle.className='tileIcon';toggle.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+glyph+'</svg>';toggle.disabled=!available;
    toggle.setAttribute('aria-label',(active?'Turn off ':'Turn on ')+name);
    toggle.onclick=(event)=>{event.stopPropagation();command(id,cover?(v==='open'?'close_cover':'open_cover'):(active?'turn_off':'turn_on'))};
    const details=document.createElement('button');details.className='tileDetails';details.disabled=!available;
