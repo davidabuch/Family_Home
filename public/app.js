@@ -4,7 +4,34 @@ async function api(path,options={}){const r=await fetch('/api/'+path,{credential
 function message(s){clearTimeout(messageTimer);$('feedback').textContent=s;if(s)messageTimer=setTimeout(()=>{$('feedback').textContent=''},2500)}
 function openLevel(id,name){const s=states[id];const cover=id.startsWith('cover.'),fan=id.startsWith('fan.');const value=fan?(s?.attributes?.percentage??0):cover?(s?.attributes?.current_position??0):Math.max(1,Math.round((s?.attributes?.brightness??128)*100/255));$('levelTitle').textContent=name;$('levelValue').textContent=value+'%';$('levelSlider').min=cover||fan?'0':'1';$('levelSlider').step=fan?'25':'1';$('levelSlider').max='100';$('levelSlider').value=String(value);$('levelPanel').classList.remove('hide');$('levelSlider').oninput=()=>{$('levelValue').textContent=$('levelSlider').value+'%'};$('levelApply').onclick=async()=>{await command(id,fan?'set_percentage':cover?'set_position':'set_brightness',Number($('levelSlider').value));$('levelPanel').classList.add('hide')};}
 $('levelClose').onclick=()=>$('levelPanel').classList.add('hide');
-function render(){for(const [root,items] of Object.entries(groups)){const el=$(root);el.replaceChildren();for(const [name,id,icon] of items){const s=states[id],v=s?.state||'unavailable',active=v==='on'||v==='open';const available=v!=='unavailable'&&v!=='unknown';const cover=id.startsWith('cover.'),fan=id.startsWith('fan.');const dimmable=id.startsWith('light.')&&s?.attributes?.supported_color_modes?.some(m=>m!=='onoff');const positional=cover&&Boolean((s?.attributes?.supported_features??0)&4);const tile=document.createElement('div');tile.className='tile'+(active?' on':'');const toggle=document.createElement('button');toggle.className='tileIcon';toggle.textContent=icon;toggle.disabled=!available;toggle.setAttribute('aria-label',(active?'Turn off ':'Turn on ')+name);toggle.onclick=()=>command(id,cover?(v==='open'?'close_cover':'open_cover'):(active?'turn_off':'turn_on'));const details=document.createElement('button');details.className='tileDetails';details.disabled=!available;const title=document.createElement('strong'),status=document.createElement('small');title.textContent=name;status.textContent=v==='on'?'On':v==='off'?'Off':v==='open'?'Open':v==='closed'?'Closed':v;details.append(title,status);if(dimmable||positional||fan){details.setAttribute('aria-label','Adjust '+name);details.onclick=()=>openLevel(id,name)}else{details.onclick=()=>toggle.click()}tile.append(toggle,details);el.append(tile)}}
+function render(){
+ for(const [root,items] of Object.entries(groups)){
+  const el=$(root);el.replaceChildren();
+  for(const [name,id] of items){
+   const s=states[id],v=s?.state||'unavailable',active=v==='on'||v==='open';
+   const available=v!=='unavailable'&&v!=='unknown';
+   const cover=id.startsWith('cover.'),fan=id.startsWith('fan.'),light=id.startsWith('light.');
+   const dimmable=light&&s?.attributes?.supported_color_modes?.some(m=>m!=='onoff');
+   const positional=cover&&Boolean((s?.attributes?.supported_features??0)&4);
+   const adjustable=dimmable||positional||fan;
+   const symbol=cover?'▤':fan?'◉':id.includes('night')?'☾':light?'✦':'◌';
+   const tile=document.createElement('div');tile.className='tile'+(active?' on':'');
+   const top=document.createElement('div');top.className='tileTop';
+   const toggle=document.createElement('button');toggle.className='tileIcon';toggle.textContent=symbol;toggle.disabled=!available;
+   toggle.setAttribute('aria-label',(active?'Turn off ':'Turn on ')+name);
+   toggle.onclick=()=>command(id,cover?(v==='open'?'close_cover':'open_cover'):(active?'turn_off':'turn_on'));
+   top.append(toggle);
+   if(adjustable){
+    const adjust=document.createElement('button');adjust.className='tileAdjust';adjust.textContent='⌁';adjust.disabled=!available;
+    adjust.setAttribute('aria-label','Adjust '+name);adjust.onclick=()=>openLevel(id,name);top.append(adjust);
+   }
+   const details=document.createElement('button');details.className='tileDetails';details.disabled=!available;
+   const title=document.createElement('strong'),status=document.createElement('small');title.textContent=name;
+   status.textContent=v==='on'?'On':v==='off'?'Off':v==='open'?'Open':v==='closed'?'Closed':v;
+   details.append(title,status);details.onclick=()=>toggle.click();
+   tile.append(top,details);el.append(tile);
+  }
+ }
 }
 
 async function refresh(){try{const data=await api('states');states=Object.fromEntries(data.states.map(s=>[s.entity_id,s]));for(const [id,p] of pending){if(Date.now()-p.at<3500){states[id]=p.state}else{pending.delete(id)}}$('updated').textContent=new Date().toLocaleTimeString();render()}catch(e){message('Connection error: '+e.message)}}
@@ -43,6 +70,7 @@ async function show(){const m=await api('me');csrf=m.csrf;$('login').classList.a
 $('loginForm').onsubmit=async e=>{e.preventDefault();try{const m=await api('login',{method:'POST',body:JSON.stringify({username:$('user').value,password:$('pass').value})});csrf=m.csrf;$('pass').value='';await show()}catch(err){alert(err.message)}};
 $('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reload()};
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))});
+$('profileButton').onclick=()=>{const menu=$('profileMenu');menu.classList.toggle('hide');$('profileButton').setAttribute('aria-expanded',String(!menu.classList.contains('hide')))};
 show().catch(()=>{});
 
 $('poolLink').href=location.protocol+'//'+location.hostname+':8101/';
