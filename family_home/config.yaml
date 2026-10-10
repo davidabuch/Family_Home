@@ -1,5 +1,5 @@
 name: Family Home
-version: "0.1.23"
+version: "0.1.24"
 slug: family_home
 description: Private family room controls with per-user administration
 url: https://github.com/davidabuch/Family_Home
@@ -15,16 +15,12 @@ ports:
   8099/tcp: 8102
 ports_description:
   8099/tcp: Family Home web interface (LAN/VPN only)
-webui: http://[HOST]:[PORT:8099]
+webui: https://home.davidbuchmd.com
 options:
-  username: alexis
-  password: ""
   session_secret: ""
   admin_username: ""
   admin_password: ""
 schema:
-  username: str
-  password: password
   session_secret: password
   admin_username: str?
   admin_password: password?
