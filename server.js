@@ -12,15 +12,13 @@ const ha=(process.env.HA_URL||'').replace(/\/$/,'');
 const token=process.env.HA_TOKEN||'';
 const secret=process.env.SESSION_SECRET||'';
 const username=(process.env.FAMILY_HOME_USERNAME||'alexis').toLowerCase();
-const passHash=process.env.FAMILY_HOME_PASSWORD_HASH||'';
-if(!ha||!token||secret.length<32||!passHash)throw Error('Configure HA_URL, HA_TOKEN, SESSION_SECRET and FAMILY_HOME_PASSWORD_HASH before starting.');
+if(!ha||!token||secret.length<32)throw Error('Configure HA_URL, HA_TOKEN and SESSION_SECRET before starting.');
 const attempts=new Map();
 const trustedProxyAddresses=new Set((process.env.FAMILY_HOME_TRUSTED_PROXY_IPS||'').split(',').map(x=>x.trim()).filter(Boolean));
 const dbPath=process.env.FAMILY_HOME_DB_PATH||'/data/family-home.json';
 const {db,migrated}=await loadDatabase(dbPath,username);
 if(migrated){
- // Existing Alexis account retains her original password through migration.
- db.users.push({id:username,username,display_name:'Alexis',role:'member',password_hash:'legacy:'+passHash,enabled:true,remote_access:false});
+ // New installations begin without family members; administrator bootstrap creates the first account.
  await saveDatabase(dbPath,db);
 }
 const adminName=process.env.FAMILY_HOME_ADMIN_USERNAME||'';
