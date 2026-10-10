@@ -1,4 +1,4 @@
-const groups={roomTiles:[['Main Lights','light.alexis_room_alexis_room_main_lights','💡'],['Bathroom Lights','light.alexis_room_alexis_bathroom_lights','💡'],['Bathroom Nightlight','light.alexis_room_alexis_bathroom_nightlight','🌙'],['Ceiling Fan','fan.alexis_room_alexis_room_ceiling_fan','🌀'],['Bathroom Fan','switch.alexis_room_alexis_bathroom_fan','🌀'],['Window Shade','cover.alexis_window_shade','▤']],sharedTiles:[['Kitchen Main','light.kitchen_kitchen_main_lights','💡'],['Living Room Main','light.living_room_living_room_main_lights','💡'],['Dining Room Main','light.dining_room_dining_room_main_lights_1','💡']],oliverTiles:[["Oliver's Main Lights",'light.olivers_room_olivers_room_main_lights','💡'],["Bathroom Lights",'light.olivers_room_olivers_bathroom_lights','💡'],["Night Light",'light.olivers_room_olivers_night_light','🌙'],["Ceiling Fan",'fan.olivers_room_olivers_room_ceiling_fan','🌀'],["Window Shade",'cover.olivers_room_shade','▤']]};
+let groups={roomTiles:[['Main Lights','light.alexis_room_alexis_room_main_lights','💡'],['Bathroom Lights','light.alexis_room_alexis_bathroom_lights','💡'],['Bathroom Nightlight','light.alexis_room_alexis_bathroom_nightlight','🌙'],['Ceiling Fan','fan.alexis_room_alexis_room_ceiling_fan','🌀'],['Bathroom Fan','switch.alexis_room_alexis_bathroom_fan','🌀'],['Window Shade','cover.alexis_window_shade','▤']],sharedTiles:[['Kitchen Main','light.kitchen_kitchen_main_lights','💡'],['Living Room Main','light.living_room_living_room_main_lights','💡'],['Dining Room Main','light.dining_room_dining_room_main_lights_1','💡']],oliverTiles:[["Oliver's Main Lights",'light.olivers_room_olivers_room_main_lights','💡'],["Bathroom Lights",'light.olivers_room_olivers_bathroom_lights','💡'],["Night Light",'light.olivers_room_olivers_night_light','🌙'],["Ceiling Fan",'fan.olivers_room_olivers_room_ceiling_fan','🌀'],["Window Shade",'cover.olivers_room_shade','▤']]};
 let csrf='',states={};const pending=new Map();let messageTimer;const $=id=>document.getElementById(id);
 async function api(path,options={}){const r=await fetch('/api/'+path,{credentials:'same-origin',...options,headers:{'Content-Type':'application/json',...(csrf?{'X-CSRF-Token':csrf}:{}),...options.headers}});const data=await r.json();if(!r.ok)throw Error(data.error||'Request failed');return data}
 function message(s){clearTimeout(messageTimer);$('feedback').textContent=s;if(s)messageTimer=setTimeout(()=>{$('feedback').textContent=''},2500)}
@@ -63,7 +63,34 @@ async function command(id,action,value){
   return false;
  }
 }
-async function show(){const m=await api('me');csrf=m.csrf;$('login').classList.add('hide');$('app').classList.remove('hide');await refresh();setInterval(()=>{if(!document.hidden)refresh()},5000)}
+function applyProfile(me){
+ const profile=me.profile||{rooms:[]};
+ const app=$('app'),nav=app.querySelector('.tabs');
+ const pool=$('pool'),poolTab=nav.querySelector('[data-tab="pool"]');
+ for(const el of [...app.querySelectorAll('.section')])if(el!==pool)el.remove();
+ for(const el of [...nav.querySelectorAll('button')])if(el!==poolTab)el.remove();
+ groups={};
+ for(const [index,room] of profile.rooms.entries()){
+  const id='userroom'+index,gridId=id+'Tiles';
+  const tab=document.createElement('button');tab.dataset.tab=id;tab.textContent=room.name;nav.insertBefore(tab,poolTab);
+  const section=document.createElement('section');section.className='section';section.id=id;
+  const title=document.createElement('h2');title.textContent=room.name;
+  const grid=document.createElement('div');grid.className='grid';grid.id=gridId;
+  section.append(title,grid);app.insertBefore(section,pool);
+  groups[gridId]=room.devices.map(d=>[d.name,d.entity_id,'']);
+ }
+ if(me.role!=='admin'&&me.username!=='alexis'){poolTab.classList.add('hide');pool.classList.add('hide')}
+ const first=nav.querySelector('button:not(.hide)');
+ if(first){first.classList.add('active');$(first.dataset.tab)?.classList.add('active')}
+ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));
+ });
+ const h=document.querySelector('h1');h.textContent=(me.display_name||me.username)+"'s Home";
+ $('profileButton').textContent=(me.display_name||me.username).charAt(0).toUpperCase();
+}
+async function show(){const m=await api('me');csrf=m.csrf;applyProfile(m);$('login').classList.add('hide');$('app').classList.remove('hide');await refresh();setInterval(()=>{if(!document.hidden)refresh()},5000)}
+
 $('loginForm').onsubmit=async e=>{e.preventDefault();try{const m=await api('login',{method:'POST',body:JSON.stringify({username:$('user').value,password:$('pass').value})});csrf=m.csrf;$('pass').value='';await show()}catch(err){alert(err.message)}};
 $('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reload()};
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))});
