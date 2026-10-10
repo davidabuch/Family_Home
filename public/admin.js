@@ -73,7 +73,35 @@ function drawRooms(){
 }
 $('member').onchange=()=>loadProfile().catch(e=>status(e.message));
 $('addRoom').onclick=()=>{const name=prompt('Room name');if(!name?.trim())return;profile.rooms.push({id:'room_'+Date.now().toString(36),name:name.trim(),devices:[]});drawRooms()};
-$('save').onclick=async()=>{try{await api('admin/profile',{method:'POST',body:JSON.stringify({user_id:$('member').value,profile})});status('Room assignments saved')}catch(e){status(e.message)}};
+let saveFeedbackTimer;
+function resetSaveFeedback(){
+ clearTimeout(saveFeedbackTimer);
+ const button=$('save');
+ if(button.disabled)return;
+ button.textContent='Save changes';
+ button.classList.remove('save-success','save-error');
+}
+$('rooms').addEventListener('input',resetSaveFeedback);
+$('rooms').addEventListener('change',resetSaveFeedback);
+$('save').onclick=async()=>{
+ const button=$('save');
+ if(button.disabled)return;
+ clearTimeout(saveFeedbackTimer);
+ button.disabled=true;
+ button.classList.remove('save-success','save-error');
+ button.textContent='Saving…';
+ try{
+  await api('admin/profile',{method:'POST',body:JSON.stringify({user_id:$('member').value,profile})});
+  button.classList.add('save-success');
+  button.textContent='✓ Saved';
+  status('Room assignments saved');
+  saveFeedbackTimer=setTimeout(resetSaveFeedback,2200);
+ }catch(e){
+  button.classList.add('save-error');
+  button.textContent='Save failed — retry';
+  status('Save failed: '+e.message);
+ }finally{button.disabled=false}
+};
 $('create').onsubmit=async ev=>{
  ev.preventDefault();const form=new FormData(ev.currentTarget),data=Object.fromEntries(form.entries());
  if(!data.copy_from)delete data.copy_from;
