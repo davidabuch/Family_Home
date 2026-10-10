@@ -31,3 +31,12 @@ One Home Assistant App, one URL, one visual design. Every family member has a se
 
 ## Rollback
 Keep the existing stable release running during branch development. No direct changes to live HA device states are required. Do not enable automatic upgrade to an untested schema migration.
+
+## Network access policy (October 2026 decision)
+- Local-first rollout. Do not deploy Cloudflare Tunnel or enable public ingress during initial multi-user commissioning.
+- Account role, entity permission, and remote-access eligibility are separate dimensions. Remote eligibility defaults to false, including administrators; explicitly opt in the owner's account only after remote security review.
+- Guests must never be eligible for remote access. Family members default to local-only; VPN use is governed by network/VPN credentials, not merely the application role.
+- Future remote entry must be separately authenticated and server-enforced, with a trustworthy origin signal from a locked-down ingress. Never trust client-supplied forwarded headers or browser UI to assert remote/local status.
+- Remote access must not expand assigned entity actions. Owner-only remote music and Pool/Spa features require separate reviewed integrations respecting existing PoolOS authority and safe command boundaries.
+- Avoid conflating VPN clients with local clients; any policy distinguishing them requires verifiable network identity, not source-IP guesses.
+- Release gate: negative tests for guest remote denial, default-off remote eligibility, direct-origin bypass, spoofed headers, and revocation before any public ingress.
