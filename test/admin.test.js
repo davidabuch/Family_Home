@@ -34,3 +34,12 @@ test('guest must have future expiration',()=>{
  const db=database();
  assert.throws(()=>createUser(db,admin,{username:'guest',password:'long strong password',display_name:'Guest',role:'guest'}));
 });
+
+test('new members and guests are not remote eligible by default',()=>{
+ const db=database();
+ const member=createUser(db,admin,{username:'localmember',password:'long strong password',display_name:'Local Member'});
+ const guest=createUser(db,admin,{username:'localguest',password:'long strong password',display_name:'Local Guest',role:'guest',expires_at:new Date(Date.now()+86400000).toISOString()});
+ assert.equal(db.users.find(u=>u.id===member.id).remote_access,false);
+ assert.equal(db.users.find(u=>u.id===guest.id).remote_access,false);
+ assert.equal(listUsers(db,admin).find(u=>u.id===member.id).remote_access,false);
+});
