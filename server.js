@@ -2,7 +2,7 @@ import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {randomBytes,scryptSync,timingSafeEqual,createHmac} from 'node:crypto';
 import {serviceFor} from './lib/permissions.js';
-import {loadDatabase,saveDatabase,backupDatabase} from './lib/database.js';
+import {loadDatabase,saveDatabase} from './lib/database.js';
 import {isSecureTransport} from './lib/transport.js';
 import {passwordHash,passwordMatches,createSession,resolveSession,revokeUserSessions} from './lib/auth.js';
 import {createUser,setProfile,disableUser,changePassword,listUsers,requireAdmin} from './lib/admin.js';
