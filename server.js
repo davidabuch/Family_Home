@@ -21,6 +21,13 @@ if(migrated){
  db.users.push({id:username,username,display_name:'Alexis',role:'member',password_hash:'legacy:'+passHash,enabled:true});
  await saveDatabase(dbPath,db);
 }
+const adminName=process.env.FAMILY_HOME_ADMIN_USERNAME||'';
+const adminPassword=process.env.FAMILY_HOME_ADMIN_PASSWORD||'';
+if(!db.users.some(u=>u.role==='admin')&&adminName&&adminPassword.length>=12){
+ if(db.users.some(u=>u.username===adminName))throw Error('Administrator username conflicts with existing account');
+ db.users.push({id:randomBytes(16).toString('hex'),username:adminName,display_name:'Family Administrator',role:'admin',password_hash:passwordHash(adminPassword),enabled:true});
+ await persist();
+}
 function userPasswordMatches(password,stored){
  if(stored.startsWith('legacy:')){
   const [salt,expected]=stored.slice(7).split(':');
