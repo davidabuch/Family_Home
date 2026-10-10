@@ -15,7 +15,7 @@ ports:
   8099/tcp: 8102
 ports_description:
   8099/tcp: Family Home web interface (LAN/VPN only)
-webui: https://home.davidbuchmd.com
+webui: http://[HOST]:[PORT:8099]
 options:
   session_secret: ""
   admin_username: ""
