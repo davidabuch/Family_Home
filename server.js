@@ -27,10 +27,27 @@ const adminName=process.env.FAMILY_HOME_ADMIN_USERNAME||'';
 const adminPassword=process.env.FAMILY_HOME_ADMIN_PASSWORD||'';
 // Non-sensitive bootstrap diagnostic; never log passwords, hashes or session secrets.
 console.info('Family Home admin bootstrap:',JSON.stringify({configured:!!adminName,password_supplied:adminPassword.length>=12,existing_admin_count:db.users.filter(u=>u.role==='admin').length,configured_username_matches_existing_admin:db.users.some(u=>u.role==='admin'&&u.username===adminName)}));
-if(!db.users.some(u=>u.role==='admin')&&adminName&&adminPassword.length>=12){
- if(db.users.some(u=>u.username===adminName))throw Error('Administrator username conflicts with existing account');
- db.users.push({id:randomBytes(16).toString('hex'),username:adminName,display_name:'Family Administrator',role:'admin',password_hash:passwordHash(adminPassword),enabled:true,remote_access:false});
- await persist();
+if(adminName&&adminPassword.length>=12){
+ const configuredAdmin=db.users.find(u=>u.role==='admin'&&u.username===adminName);
+ if(configuredAdmin){
+  // Reconcile only when the add-on's configured bootstrap password has changed.
+  // Later in-app password changes are preserved when the add-on configuration is unchanged.
+  if(!db.admin_bootstrap_password_hash||!passwordMatches(adminPassword,db.admin_bootstrap_password_hash)){
+   configuredAdmin.password_hash=passwordHash(adminPassword);
+   configuredAdmin.enabled=true;
+   revokeUserSessions(db,configuredAdmin.id);
+   db.admin_bootstrap_password_hash=passwordHash(adminPassword);
+   await persist();
+   console.info('Family Home administrator credentials reconciled from add-on configuration.');
+  }
+ }else if(!db.users.some(u=>u.role==='admin')){
+  if(db.users.some(u=>u.username===adminName))throw Error('Administrator username conflicts with existing account');
+  db.users.push({id:randomBytes(16).toString('hex'),username:adminName,display_name:'Family Administrator',role:'admin',password_hash:passwordHash(adminPassword),enabled:true,remote_access:false});
+  db.admin_bootstrap_password_hash=passwordHash(adminPassword);
+  await persist();
+ }else{
+  console.warn('Family Home configured administrator username differs from stored administrator; existing account preserved.');
+ }
 }
 function userPasswordMatches(password,stored){
  if(stored.startsWith('legacy:')){
