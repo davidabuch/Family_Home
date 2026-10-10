@@ -8,28 +8,25 @@ function render(){
  for(const [root,items] of Object.entries(groups)){
   const el=$(root);el.replaceChildren();
   for(const [name,id] of items){
-   const s=states[id],v=s?.state||'unavailable',active=v==='on'||v==='open';
+   const state=states[id],v=state?.state||'unavailable',active=v==='on'||v==='open';
    const available=v!=='unavailable'&&v!=='unknown';
    const cover=id.startsWith('cover.'),fan=id.startsWith('fan.'),light=id.startsWith('light.');
-   const dimmable=light&&s?.attributes?.supported_color_modes?.some(m=>m!=='onoff');
-   const positional=cover&&Boolean((s?.attributes?.supported_features??0)&4);
-   const adjustable=dimmable||positional||fan;
-   const symbol=cover?'▤':fan?'◉':id.includes('night')?'☾':light?'✦':'◌';
+   const dimmable=light&&state?.attributes?.supported_color_modes?.some(m=>m!=='onoff');
+   const positional=cover&&Boolean((state?.attributes?.supported_features??0)&4);
+   const adjustable=Boolean(dimmable||positional||fan);
+   const symbol=cover?'▤':fan?'◉':id.includes('night')?'☾':light?'●':'◌';
    const tile=document.createElement('div');tile.className='tile'+(active?' on':'');
-   const top=document.createElement('div');top.className='tileTop';
    const toggle=document.createElement('button');toggle.className='tileIcon';toggle.textContent=symbol;toggle.disabled=!available;
    toggle.setAttribute('aria-label',(active?'Turn off ':'Turn on ')+name);
-   toggle.onclick=()=>command(id,cover?(v==='open'?'close_cover':'open_cover'):(active?'turn_off':'turn_on'));
-   top.append(toggle);
-   if(adjustable){
-    const adjust=document.createElement('button');adjust.className='tileAdjust';adjust.textContent='⌁';adjust.disabled=!available;
-    adjust.setAttribute('aria-label','Adjust '+name);adjust.onclick=()=>openLevel(id,name);top.append(adjust);
-   }
+   toggle.onclick=(event)=>{event.stopPropagation();command(id,cover?(v==='open'?'close_cover':'open_cover'):(active?'turn_off':'turn_on'))};
    const details=document.createElement('button');details.className='tileDetails';details.disabled=!available;
    const title=document.createElement('strong'),status=document.createElement('small');title.textContent=name;
    status.textContent=v==='on'?'On':v==='off'?'Off':v==='open'?'Open':v==='closed'?'Closed':v;
-   details.append(title,status);details.onclick=()=>toggle.click();
-   tile.append(top,details);el.append(tile);
+   details.append(title,status);
+   details.setAttribute('aria-label',adjustable?'Adjust '+name:(active?'Turn off ':'Turn on ')+name);
+   details.onclick=(event)=>{event.stopPropagation();if(adjustable)openLevel(id,name);else toggle.click()};
+   tile.onclick=()=>{if(!available)return;if(adjustable)openLevel(id,name);else toggle.click()};
+   tile.append(toggle,details);el.append(tile);
   }
  }
 }
