@@ -20,7 +20,11 @@ options:
   username: alexis
   password: ""
   session_secret: ""
+  admin_username: ""
+  admin_password: ""
 schema:
   username: str
   password: password
   session_secret: password
+  admin_username: str?
+  admin_password: password?
