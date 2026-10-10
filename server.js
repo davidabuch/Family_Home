@@ -3,6 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {randomBytes,scryptSync,timingSafeEqual,createHmac} from 'node:crypto';
 import {serviceFor} from './lib/permissions.js';
 import {loadDatabase,saveDatabase} from './lib/database.js';
+import {isSecureTransport} from './lib/transport.js';
 import {passwordHash,passwordMatches,createSession,resolveSession,revokeUserSessions} from './lib/auth.js';
 import {createUser,setProfile,disableUser,changePassword,listUsers,requireAdmin} from './lib/admin.js';
 import {seedAlexis,permitted,profileEntities,allowedActions} from './lib/profiles.js';
@@ -39,7 +40,7 @@ function userPasswordMatches(password,stored){
 }
 function secureRequest(req){
  // Trust proxy forwarding only when explicitly configured with a trusted proxy.
- return Boolean(req.socket.encrypted)||(trustedProxyAddresses.has(req.socket.remoteAddress)&&req.headers['x-forwarded-proto']==='https');
+ return isSecureTransport(req,trustedProxyAddresses);
 }
 function getSession(req){
  const sid=cookies(req).fh_session;
@@ -64,7 +65,7 @@ const server=http.createServer(async(req,res)=>{try{
   if(!secureRequest(req))return json(res,426,{error:'HTTPS required for Family Home sign-in'});
   const ip=req.socket.remoteAddress||'unknown',now=Date.now(),recent=(attempts.get(ip)||[]).filter(t=>now-t<600000);
   if(recent.length>=5)return json(res,429,{error:'Too many attempts'});
-  const data=await body(req),user=db.users.find(u=>u.username===data.username&&u.enabled!==false);
+  const data=await body(req),user=db.users.find(u=>u.username===data.username&&u.enabled!==false&&(!u.expires_at||Date.parse(u.expires_at)>now));
   if(!user||typeof data.password!=='string'||!userPasswordMatches(data.password,user.password_hash)){
    recent.push(now);attempts.set(ip,recent);return json(res,401,{error:'Invalid credentials'});
   }
@@ -73,6 +74,7 @@ const server=http.createServer(async(req,res)=>{try{
   await persist();
   return json(res,200,{csrf:created.csrf,username:user.username,role:user.role},{'Set-Cookie':`fh_session=${created.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=2592000`});
  }
+ if(!secureRequest(req))return json(res,426,{error:'HTTPS required'});
  const session=getSession(req);if(!session)return json(res,401,{error:'Login required'});
  if(path==='/api/me'&&req.method==='GET')return json(res,200,{username:session.user.username,display_name:session.user.display_name,role:session.user.role,csrf:session.csrf,profile:db.profiles[session.user.id]||{rooms:[]}});
  if(path==='/api/logout'&&req.method==='POST'){if(!isSameOrigin(req)||req.headers['x-csrf-token']!==session.csrf)return json(res,403,{error:'Forbidden'});db.sessions=db.sessions.filter(s=>s.id!==session.id);await persist();return json(res,200,{ok:true},{'Set-Cookie':'fh_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0'})}
