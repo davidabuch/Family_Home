@@ -22,7 +22,7 @@ function render(){
    toggle.onclick=(event)=>{event.stopPropagation();command(id,cover?(v==='open'?'close_cover':'open_cover'):(active?'turn_off':'turn_on'))};
    const details=document.createElement('button');details.className='tileDetails';details.disabled=!available;
    const title=document.createElement('strong'),status=document.createElement('small');title.textContent=name;
-   status.textContent=v==='on'?'On':v==='off'?'Off':v==='open'?'Open':v==='closed'?'Closed':v;
+   status.textContent=cover&&Number.isFinite(Number(state?.attributes?.current_position))&&state?.attributes?.current_position!=null?Math.max(0,Math.min(100,Math.round(Number(state.attributes.current_position))))+'% Open':v==='on'?'On':v==='off'?'Off':v==='open'?'Open':v==='closed'?'Closed':v;
    details.append(title,status);
    details.setAttribute('aria-label',adjustable?'Adjust '+name:(active?'Turn off ':'Turn on ')+name);
    details.onclick=(event)=>{event.stopPropagation();if(adjustable)openLevel(id,name);else toggle.click()};
@@ -53,7 +53,6 @@ async function command(id,action,value){
  }
  try{
   await api('action',{method:'POST',body:JSON.stringify({entity_id:id,action,...(value===undefined?{}:{value})})});
-  message('Command sent');
   // Reconcile in the background: never block further taps on a slow HA read.
   refresh();
   return true;
