@@ -15,5 +15,10 @@ jobs:
           node --check server.js
           node --check public/app.js
           node --check lib/permissions.js
+          node --check public/admin.js
+          node --check lib/auth.js
+          node --check lib/database.js
+          node --check lib/profiles.js
+          node --check lib/admin.js
       - name: Unit tests
         run: npm test
