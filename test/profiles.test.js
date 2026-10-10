@@ -34,3 +34,15 @@ test('copying a profile produces independent editable room assignments',()=>{
  copy.rooms[0].devices[0].name='Changed';
  assert.notEqual(copy.rooms[0].devices[0].name,original.rooms[0].devices[0].name);
 });
+
+test('cover commands are individually gated by live supported_features',()=>{
+ assert.deepEqual(allowedActions('cover.partial',{supported_features:1}),['open_cover']);
+ assert.deepEqual(allowedActions('cover.partial',{supported_features:2}),['close_cover']);
+ assert.deepEqual(allowedActions('cover.partial',{supported_features:4}),['set_position']);
+ assert.deepEqual(allowedActions('cover.partial',{supported_features:8}),['stop_cover']);
+ assert.deepEqual(allowedActions('cover.full',{supported_features:15}),['open_cover','close_cover','stop_cover','set_position']);
+});
+test('fan percentage requires live speed support',()=>{
+ assert.deepEqual(allowedActions('fan.fixed',{supported_features:0}),['turn_on','turn_off']);
+ assert.ok(allowedActions('fan.speed',{supported_features:1}).includes('set_percentage'));
+});
