@@ -1,5 +1,6 @@
 import {readFileSync} from 'node:fs';
 import {scryptSync,randomBytes} from 'node:crypto';
+import {lookup} from 'node:dns/promises';
 const opts=JSON.parse(readFileSync('/data/options.json','utf8'));
 const password=opts.password||'',secret=opts.session_secret||'';
 if(password.length<10||secret.length<32){console.error('Family Home requires password (10+ characters) and session_secret (32+ characters) in App configuration.');process.exit(1)}
@@ -13,5 +14,14 @@ process.env.FAMILY_HOME_DB_PATH='/data/family-home.json';
 process.env.HA_URL='http://supervisor/core';
 process.env.HA_TOKEN=process.env.SUPERVISOR_TOKEN||'';
 process.env.PORT='8099';
+// Resolve the local Nginx Proxy Manager add-on; never trust arbitrary client forwarding headers.
+// If the proxy is unavailable, HTTPS authentication fails closed until the app is restarted.
+try {
+ const addresses=await lookup('a0d7b954-nginxproxymanager',{all:true});
+ process.env.FAMILY_HOME_TRUSTED_PROXY_IPS=addresses.map(a=>a.address).join(',');
+} catch(err) {
+ console.error('Trusted reverse proxy DNS unavailable; forwarded HTTPS disabled.');
+ process.env.FAMILY_HOME_TRUSTED_PROXY_IPS='';
+}
 if(!process.env.HA_TOKEN){console.error('Supervisor token unavailable; homeassistant_api must be enabled.');process.exit(1)}
 await import('./server.js');
