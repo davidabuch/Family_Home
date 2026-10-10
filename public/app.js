@@ -91,7 +91,7 @@ function applyProfile(me){
  if(me.role==='admin'){
   const menu=$('profileMenu'),link=document.createElement('a');link.href='/admin.html';link.textContent='Manage Home';link.className='btn';menu.prepend(link);
  }
- const h=document.querySelector('h1');h.textContent=(me.display_name||me.username)+"'s Home";
+ const h=document.querySelector('h1');h.textContent=(me.display_name||me.username)+"'s Home";document.title='Family Home · '+(me.display_name||me.username);
  $('profileButton').textContent=(me.display_name||me.username).charAt(0).toUpperCase();
 }
 async function show(){const m=await api('me');csrf=m.csrf;applyProfile(m);$('login').classList.add('hide');$('app').classList.remove('hide');await refresh();setInterval(()=>{if(!document.hidden)refresh()},5000)}
