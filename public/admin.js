@@ -58,7 +58,7 @@ function drawRooms(){
   const search=document.createElement('input');search.type='search';search.placeholder='Search lights, shades, fans or entity IDs';search.setAttribute('aria-label','Search Home Assistant accessories');
   const picker=document.createElement('select');picker.setAttribute('aria-label','Matching accessories');
   const assigned=new Set(profile.rooms.flatMap(r=>r.devices.map(d=>d.entity_id)));
-  const matches=(e,q)=>{const terms=q.toLowerCase().trim().split(/\\s+/).filter(Boolean);const hay=(e.name+' '+e.entity_id.replaceAll('_',' ')).toLowerCase();return terms.every(t=>hay.includes(t))};
+  const matches=(e,q)=>{const terms=q.toLowerCase().trim().split(/\s+/).filter(Boolean);const hay=(e.name+' '+e.entity_id.replaceAll('_',' ')).toLowerCase();return terms.every(t=>hay.includes(t))};
   function filter(){
    const q=search.value;const available=entities.filter(e=>!assigned.has(e.entity_id)&&matches(e,q));
    picker.replaceChildren(option('','Select accessory ('+available.length+' matches)'));
@@ -77,13 +77,14 @@ $('save').onclick=async()=>{try{await api('admin/profile',{method:'POST',body:JS
 $('create').onsubmit=async ev=>{
  ev.preventDefault();const form=new FormData(ev.currentTarget),data=Object.fromEntries(form.entries());
  if(!data.copy_from)delete data.copy_from;
- const submit=ev.currentTarget.querySelector('button[type=submit],button:not([type])');submit.disabled=true;submit.textContent='Creating…';\n try{await api('admin/users',{method:'POST',body:JSON.stringify(data)});ev.currentTarget.reset();await loadUsers();status('Family member created')}catch(e){status(e.message)}finally{submit.disabled=false;submit.textContent='Create account'}
+ const submit=ev.currentTarget.querySelector('button[type=submit],button:not([type])');submit.disabled=true;submit.textContent='Creating…';
+ try{await api('admin/users',{method:'POST',body:JSON.stringify(data)});ev.currentTarget.reset();await loadUsers();status('Family member created')}catch(e){status(e.message)}finally{submit.disabled=false;submit.textContent='Create account'}
 };
 (async()=>{
  try{
   const me=await api('me');csrf=me.csrf;
   if(me.role!=='admin')throw Error('Administrator access required');
-  entities=(await api('admin/entities')).entities;
   await loadUsers();
+  try{entities=(await api('admin/entities')).entities}catch(e){status('Accessory catalog unavailable: '+e.message)}
  }catch(e){status(e.message)}
 })();
