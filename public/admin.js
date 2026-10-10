@@ -55,12 +55,20 @@ function drawRooms(){
    }
    line.append(text,rename,permissions,del);box.append(line);
   }
-  const picker=document.createElement('select');picker.append(option('','Select accessory to add'));
+  const search=document.createElement('input');search.type='search';search.placeholder='Search lights, shades, fans or entity IDs';search.setAttribute('aria-label','Search Home Assistant accessories');
+  const picker=document.createElement('select');picker.setAttribute('aria-label','Matching accessories');
   const assigned=new Set(profile.rooms.flatMap(r=>r.devices.map(d=>d.entity_id)));
-  for(const e of entities.filter(e=>!assigned.has(e.entity_id)))picker.append(option(e.entity_id,e.name+' · '+e.entity_id));
-  const add=document.createElement('button');add.textContent='Add accessory';
-  add.onclick=()=>{const e=entities.find(e=>e.entity_id===picker.value);if(!e)return;room.devices.push({entity_id:e.entity_id,name:e.name,actions:[...e.actions]});drawRooms()};
-  box.append(picker,add);$('rooms').append(box);
+  const matches=(e,q)=>{const terms=q.toLowerCase().trim().split(/\\s+/).filter(Boolean);const hay=(e.name+' '+e.entity_id.replaceAll('_',' ')).toLowerCase();return terms.every(t=>hay.includes(t))};
+  function filter(){
+   const q=search.value;const available=entities.filter(e=>!assigned.has(e.entity_id)&&matches(e,q));
+   picker.replaceChildren(option('','Select accessory ('+available.length+' matches)'));
+   for(const e of available.slice(0,100))picker.append(option(e.entity_id,e.name+' · '+e.entity_id));
+   if(!available.length)picker.options[0].textContent='No matching accessories';
+  }
+  search.oninput=filter;filter();
+  const add=document.createElement('button');add.textContent='Add accessory';add.type='button';
+  add.onclick=()=>{const e=entities.find(e=>e.entity_id===picker.value);if(!e)return;room.devices.push({entity_id:e.entity_id,name:e.name,actions:[...e.actions]});drawRooms();status(e.name+' added to '+room.name+' — click Save changes to apply')};
+  box.append(search,picker,add);$('rooms').append(box);
  }
 }
 $('member').onchange=()=>loadProfile().catch(e=>status(e.message));
@@ -69,7 +77,7 @@ $('save').onclick=async()=>{try{await api('admin/profile',{method:'POST',body:JS
 $('create').onsubmit=async ev=>{
  ev.preventDefault();const form=new FormData(ev.currentTarget),data=Object.fromEntries(form.entries());
  if(!data.copy_from)delete data.copy_from;
- try{await api('admin/users',{method:'POST',body:JSON.stringify(data)});ev.currentTarget.reset();await loadUsers();status('Family member created')}catch(e){status(e.message)}
+ const submit=ev.currentTarget.querySelector('button[type=submit],button:not([type])');submit.disabled=true;submit.textContent='Creating…';\n try{await api('admin/users',{method:'POST',body:JSON.stringify(data)});ev.currentTarget.reset();await loadUsers();status('Family member created')}catch(e){status(e.message)}finally{submit.disabled=false;submit.textContent='Create account'}
 };
 (async()=>{
  try{
