@@ -1,0 +1,26 @@
+name: Family Home
+version: "0.1.0"
+slug: family_home
+description: Alexis pilot — scoped Home Assistant controls and security
+url: https://github.com/davidabuch/Family_Home
+arch:
+  - amd64
+  - aarch64
+startup: application
+boot: manual
+init: false
+homeassistant_api: true
+host_network: false
+ports:
+  8099/tcp: 8102
+ports_description:
+  8099/tcp: Family Home web interface (LAN/VPN only)
+webui: http://[HOST]:[PORT:8099]
+options:
+  username: alexis
+  password: ""
+  session_secret: ""
+schema:
+  username: str
+  password: password
+  session_secret: password
