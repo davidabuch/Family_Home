@@ -18,7 +18,10 @@ process.env.PORT='8099';
 // If the proxy is unavailable, HTTPS authentication fails closed until the app is restarted.
 try {
  const addresses=await lookup('a0d7b954-nginxproxymanager',{all:true});
- process.env.FAMILY_HOME_TRUSTED_PROXY_IPS=addresses.map(a=>a.address).join(',');
+ // HA Supervisor's published add-on port is reached through its internal gateway.
+ // Trust this fixed HA add-on ingress gateway in addition to NPM's resolved addresses.
+ // This does not trust arbitrary X-Forwarded-For client addresses.
+ process.env.FAMILY_HOME_TRUSTED_PROXY_IPS=[...addresses.map(a=>a.address),'172.30.32.1'].join(',');
 } catch(err) {
  console.error('Trusted reverse proxy DNS unavailable; forwarded HTTPS disabled.');
  process.env.FAMILY_HOME_TRUSTED_PROXY_IPS='';
