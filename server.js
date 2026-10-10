@@ -60,6 +60,7 @@ const server=http.createServer(async(req,res)=>{try{
  if(path==='/api/health'&&req.method==='GET')return json(res,200,{ok:true});
  if(path==='/api/login'&&req.method==='POST'){
   if(!isSameOrigin(req))return json(res,403,{error:'Origin rejected'});
+  if(!secureRequest(req))return json(res,426,{error:'HTTPS required for Family Home sign-in'});
   const ip=req.socket.remoteAddress||'unknown',now=Date.now(),recent=(attempts.get(ip)||[]).filter(t=>now-t<600000);
   if(recent.length>=5)return json(res,429,{error:'Too many attempts'});
   const data=await body(req),user=db.users.find(u=>u.username===data.username&&u.enabled!==false);
@@ -67,8 +68,6 @@ const server=http.createServer(async(req,res)=>{try{
    recent.push(now);attempts.set(ip,recent);return json(res,401,{error:'Invalid credentials'});
   }
   attempts.delete(ip);
-  // Short-lived legacy sessions remain available on HTTP; persistent sessions require HTTPS.
-  if(!secureRequest(req))return json(res,426,{error:'HTTPS required for Family Home sign-in'});
   const created=createSession(db,user.id,{secure:true});
   await persist();
   return json(res,200,{csrf:created.csrf,username:user.username,role:user.role},{'Set-Cookie':`fh_session=${created.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=2592000`});
