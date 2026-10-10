@@ -15,3 +15,5 @@ $('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reloa
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))});
 document.querySelectorAll('[data-alarm]').forEach(b=>b.onclick=()=>command('alarm_control_panel.los_angeles_alarm',b.dataset.alarm));
 show().catch(()=>{});
+
+$('poolLink').href=location.protocol+'//'+location.hostname+':8101/';
