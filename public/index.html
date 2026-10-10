@@ -13,4 +13,18 @@ body{background:radial-gradient(ellipse at 9% 0%,#7faed0 0%,transparent 43%),rad
 .tile[data-kind="light"] .tileIcon svg .bulb-fill{fill:currentColor;stroke:currentColor}
 .tabs{background:rgba(36,47,59,.74)}
 .levelBox{background:linear-gradient(145deg,#53697a,#303c50)}
+/* Active accessories: bright Home-style card, dark typography, saturated circular control. */
+.tile.on{background:rgba(250,250,252,.97);border-color:rgba(255,255,255,.9);color:#151719;box-shadow:0 2px 10px rgba(25,30,37,.09),inset 0 1px 0 #fff;backdrop-filter:none;-webkit-backdrop-filter:none}
+.tile.on .tileDetails,.tile.on strong{color:#151719}
+.tile.on small{color:#85868a}
+.tile.on .tileIcon{background:var(--on-circle,#ffcc00);color:#fff}
+.tile[data-kind="light"]{--on-circle:#ffcc00}
+.tile[data-kind="fan"]{--on-circle:#35b8e9}
+.tile[data-kind="shade"]{--on-circle:#36b6e6}
+.tile[data-kind="switch"]{--on-circle:#3cbcb2}
+.tile.on .tileIcon svg{color:#fff}
+.tile:not(.on) .tileIcon{background:rgba(32,38,44,.28)}
+.tile:not(.on) .tileDetails,.tile:not(.on) strong{color:#f7f7f8}
+.tile:not(.on) small{color:#d0d1d3}
+@media(prefers-reduced-motion:no-preference){.tile{transition:background-color .16s ease,border-color .16s ease,color .16s ease}.tileIcon{transition:background-color .16s ease,color .16s ease}}
 </style></head><body><main class="wrap"><header><div><div class="eyebrow">FAMILY HOME</div><h1>Alexis's Home</h1></div><div class="profile"><button id="profileButton" class="avatar" aria-label="Account menu" aria-expanded="false">A</button><div id="profileMenu" class="profileMenu hide"><button id="logout">Sign out</button></div></div></header><div id="login" class="card"><h2>Welcome home</h2><p>Sign in to view and control your approved devices.</p><form id="loginForm"><input id="user" autocomplete="username" placeholder="Username" required><input id="pass" type="password" autocomplete="current-password" placeholder="Password" required><button class="btn">Sign in</button></form></div><div id="app" class="hide"><div class="connection">Home Assistant connected · <span id="updated">Connecting</span></div><nav class="tabs"><button class="active" data-tab="room">My Room</button><button data-tab="shared">Shared Areas</button><button data-tab="oliver">Oliver's Room</button><button data-tab="pool">Pool & Spa</button></nav><div id="feedback" role="status"></div><section class="section active" id="room"><h2>Lights & Comfort</h2><div class="grid" id="roomTiles"></div></section><section class="section" id="shared"><h2>Shared Main Lights</h2><div class="grid" id="sharedTiles"></div><p>Main Lutron lights only; no cabinets.</p></section><section class="section" id="oliver"><h2>Oliver's Room</h2><div class="grid" id="oliverTiles"></div></section><section class="section" id="pool"><h2>Pool & Spa</h2><p>Open the separate Pool & Spa Family controller for pool and spa equipment.</p><a class="btn" id="poolLink" href="#" target="_blank" rel="noopener noreferrer">Open Pool & Spa Family ↗</a></section></div><div id="levelPanel" class="levelPanel hide" role="dialog" aria-modal="true" aria-labelledby="levelTitle"><div class="levelBox"><h2 id="levelTitle">Adjust</h2><strong id="levelValue">50%</strong><input id="levelSlider" type="range" min="0" max="100" step="1" aria-label="Brightness, fan speed, or shade position"><div class="levelActions"><button class="btn" id="levelClose">Cancel</button><button class="btn" id="levelApply">Set level</button></div></div></div><footer class="sub" style="margin-top:35px">Family Home · Alexis Pilot · Humidifier deferred</footer></main><script src="/app.js" defer></script></body></html>
