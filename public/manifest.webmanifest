@@ -1,0 +1,8 @@
+{
+  "name": "Family Home",
+  "short_name": "Family Home",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111d30",
+  "theme_color": "#111d30"
+}
