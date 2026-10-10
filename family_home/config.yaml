@@ -1,7 +1,7 @@
 name: Family Home
-version: "0.1.16"
+version: "0.1.17"
 slug: family_home
-description: Alexis pilot — scoped Home Assistant room controls
+description: Private family room controls with per-user administration
 url: https://github.com/davidabuch/Family_Home
 arch:
   - amd64
