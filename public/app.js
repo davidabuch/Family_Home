@@ -82,6 +82,29 @@ function applyProfile(me){
   section.append(title,grid);app.insertBefore(section,pool);
   groups[gridId]=room.devices.map(d=>[d.name,d.entity_id,'']);
  }
+ // Music is a link to the separate authenticated Family Music application.
+ // Keep it inside the signed-in app, and do not alter HA entity permissions.
+ if(['alexis','kaelah'].includes(me.username.toLowerCase())){
+  const tab=document.createElement('button');
+  tab.dataset.tab='music';
+  tab.textContent='Music';
+  nav.append(tab);
+  const section=document.createElement('section');
+  section.className='section';
+  section.id='music';
+  const title=document.createElement('h2');
+  title.textContent='Family Music';
+  const description=document.createElement('p');
+  description.textContent='Open Family Music to listen and control your music.';
+  const link=document.createElement('a');
+  link.className='btn';
+  link.href='https://music.davidbuchmd.com/';
+  link.target='_blank';
+  link.rel='noopener noreferrer';
+  link.textContent='Open Family Music ↗';
+  section.append(title,description,link);
+  app.append(section);
+ }
  if(me.role!=='admin'&&me.username.toLowerCase()!=='alexis'){poolTab.classList.add('hide');pool.classList.add('hide')}
  const first=nav.querySelector('button:not(.hide)');
  if(first){first.classList.add('active');$(first.dataset.tab)?.classList.add('active')}
