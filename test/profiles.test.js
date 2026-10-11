@@ -46,3 +46,13 @@ test('fan percentage requires live speed support',()=>{
  assert.deepEqual(allowedActions('fan.fixed',{supported_features:0}),['turn_on','turn_off']);
  assert.ok(allowedActions('fan.speed',{supported_features:1}).includes('set_percentage'));
 });
+
+test('Family Music link is restricted to signed-in Alexis and Kaelah',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const js=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
+ const html=await readFile(new URL('../public/index.html',import.meta.url),'utf8');
+ assert.match(js,/\['alexis','kaelah'\]\.includes\(me\.username\.toLowerCase\(\)\)/);
+ assert.match(js,/https:\/\/music\.davidbuchmd\.com\//);
+ assert.match(js,/link\.rel='noopener noreferrer'/);
+ assert.doesNotMatch(html,/music\.davidbuchmd\.com/);
+});
