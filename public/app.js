@@ -84,7 +84,7 @@ function applyProfile(me){
  }
  // Music is a link to the separate authenticated Family Music application.
  // Keep it inside the signed-in app, and do not alter HA entity permissions.
- if(['alexis','kaelah'].includes(me.username.toLowerCase())){
+ if(profile.show_music===true || (profile.show_music===undefined && ['alexis','kaelah'].includes(me.username.toLowerCase()))){
   const tab=document.createElement('button');
   tab.dataset.tab='music';
   tab.textContent='Music';
@@ -98,7 +98,7 @@ function applyProfile(me){
   description.textContent='Open Family Music to listen and control your music.';
   const link=document.createElement('a');
   link.className='btn';
-  link.href='https://music.davidbuchmd.com/';
+  link.href=location.hostname==='home-local.davidbuchmd.com'?'http://192.168.1.125:8099/':'https://music.davidbuchmd.com/';
   link.target='_blank';
   link.rel='noopener noreferrer';
   link.textContent='Open Family Music ↗';
