@@ -105,7 +105,7 @@ function applyProfile(me){
   section.append(title,description,link);
   app.append(section);
  }
- if(me.role!=='admin'&&me.username.toLowerCase()!=='alexis'){poolTab.classList.add('hide');pool.classList.add('hide')}
+ if(!(profile.show_pool===true || (profile.show_pool===undefined && (me.role==='admin'||me.username.toLowerCase()==='alexis')))){poolTab.classList.add('hide');pool.classList.add('hide')}
  const first=nav.querySelector('button:not(.hide)');
  if(first){first.classList.add('active');$(first.dataset.tab)?.classList.add('active')}
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
