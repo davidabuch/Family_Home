@@ -30,6 +30,7 @@ async function loadUsers(){
 async function loadProfile(){
  const id=$('member').value;if(!id)return;
  profile=(await api('admin/profile?user_id='+encodeURIComponent(id))).profile;
+ $('showMusic').checked=profile.show_music===true || (profile.show_music===undefined && ['alexis','kaelah'].includes(users.find(u=>u.id===id)?.username));
  drawRooms();
 }
 function drawRooms(){
@@ -81,6 +82,7 @@ function resetSaveFeedback(){
  button.textContent='Save changes';
  button.classList.remove('save-success','save-error');
 }
+$('showMusic').onchange=()=>{profile.show_music=$('showMusic').checked;resetSaveFeedback()};
 $('rooms').addEventListener('input',resetSaveFeedback);
 $('rooms').addEventListener('change',resetSaveFeedback);
 $('save').onclick=async()=>{
@@ -91,7 +93,7 @@ $('save').onclick=async()=>{
  button.classList.remove('save-success','save-error');
  button.textContent='Saving…';
  try{
-  await api('admin/profile',{method:'POST',body:JSON.stringify({user_id:$('member').value,profile})});
+  await api('admin/profile',{method:'POST',body:JSON.stringify({user_id:$('member').value,profile:{...profile,show_music:$('showMusic').checked}})});
   button.classList.add('save-success');
   button.textContent='✓ Saved';
   status('Room assignments saved');
