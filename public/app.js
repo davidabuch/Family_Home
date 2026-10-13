@@ -126,4 +126,4 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.query
 $('profileButton').onclick=()=>{const menu=$('profileMenu');menu.classList.toggle('hide');$('profileButton').setAttribute('aria-expanded',String(!menu.classList.contains('hide')))};
 show().catch(()=>{});
 
-$('poolLink').href=location.protocol+'//'+location.hostname+':8101/';
+$('poolLink').href='https://pool-local.davidbuchmd.com/';
