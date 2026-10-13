@@ -11,6 +11,8 @@ const port=Number(process.env.PORT||8099);
 const ha=(process.env.HA_URL||'').replace(/\/$/,'');
 const token=process.env.HA_TOKEN||'';
 const secret=process.env.SESSION_SECRET||'';
+const poolHandoffSecret=process.env.POOL_HANDOFF_SECRET||'';
+const poolHandoffDestination=process.env.POOL_HANDOFF_DESTINATION||'https://pool-local.davidbuchmd.com/api/admin-handoff';
 const username=(process.env.FAMILY_HOME_USERNAME||'alexis').toLowerCase();
 if(!ha||!token||secret.length<32)throw Error('Configure HA_URL, HA_TOKEN and SESSION_SECRET before starting.');
 const attempts=new Map();
@@ -102,6 +104,15 @@ const server=http.createServer(async(req,res)=>{try{
  }
  if(!secureRequest(req))return json(res,426,{error:'HTTPS required'});
  const session=getSession(req);if(!session)return json(res,401,{error:'Login required'});
+ if(path==='/api/pool-admin-handoff'&&req.method==='GET'){
+  if(session.user.role!=='admin'||!poolHandoffSecret||poolHandoffSecret.length<32)return json(res,403,{error:'Pool administrator handoff unavailable'});
+  const destination=new URL(poolHandoffDestination);
+  if(destination.protocol!=='https:'||!['pool-local.davidbuchmd.com','pool.davidbuchmd.com'].includes(destination.hostname)||destination.pathname!=='/api/admin-handoff')return json(res,503,{error:'Pool handoff destination invalid'});
+  const payload=Buffer.from(JSON.stringify({aud:'pool-spa-family',sub:session.user.id,role:'admin',exp:Math.floor(Date.now()/1000)+60,nonce:randomBytes(24).toString('hex')})).toString('base64url');
+  const signature=createHmac('sha256',poolHandoffSecret).update(payload).digest('base64url');
+  destination.searchParams.set('ticket',payload+'.'+signature);
+  res.writeHead(303,{'Location':destination.toString(),'Cache-Control':'no-store','Referrer-Policy':'no-referrer'});res.end();return;
+ }
  if(path==='/api/me'&&req.method==='GET')return json(res,200,{username:session.user.username,display_name:session.user.display_name,role:session.user.role,csrf:session.csrf,profile:db.profiles[session.user.id]||{rooms:[]}});
  if(path==='/api/logout'&&req.method==='POST'){if(!isSameOrigin(req)||req.headers['x-csrf-token']!==session.csrf)return json(res,403,{error:'Forbidden'});db.sessions=db.sessions.filter(s=>s.id!==session.id);await persist();return json(res,200,{ok:true},{'Set-Cookie':'fh_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0'})}
  if(path==='/api/states'&&req.method==='GET'){const states=await haRequest('states');return json(res,200,{states:states.filter(s=>profileEntities(db.profiles[session.user.id]||{rooms:[]}).has(s.entity_id)).map(s=>({entity_id:s.entity_id,state:s.state,attributes:{friendly_name:s.attributes?.friendly_name,current_position:s.attributes?.current_position,supported_features:s.attributes?.supported_features,supported_color_modes:s.attributes?.supported_color_modes,brightness:s.attributes?.brightness,percentage:s.attributes?.percentage,percentage_step:s.attributes?.percentage_step,device_class:s.attributes?.device_class}}))})}
