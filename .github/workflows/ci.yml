@@ -10,6 +10,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify approved icon derivatives
+        run: |
+          pip install Pillow==11.3.0
+          python scripts/generate_icons.py --check
       - name: Syntax checks
         run: |
           node --check server.js
