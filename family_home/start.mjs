@@ -12,10 +12,7 @@ process.env.HA_TOKEN=process.env.SUPERVISOR_TOKEN||'';
 process.env.PORT='8099';
 process.env.FAMILY_HOME_PROXY_SECRET=opts.proxy_secret||'';
 process.env.FAMILY_HOME_PUBLIC_ORIGIN=opts.public_origin||'https://home-local.davidbuchmd.com';
-process.env.POOL_HANDOFF_SECRET=opts.pool_handoff_secret||'';
-process.env.POOL_LOCAL_ORIGIN=opts.pool_local_origin||'https://pool-local.davidbuchmd.com';
 process.env.FAMILY_HOME_REMOTE_ORIGIN=opts.remote_origin||'';
-process.env.POOL_REMOTE_ORIGIN=opts.pool_remote_origin||'';
 // Prefer NPM's container-to-container route. Never implicitly trust a shared NAT gateway.
 try {
  const addresses=await lookup('a0d7b954-nginxproxymanager',{all:true});
