@@ -11,7 +11,6 @@ const port=Number(process.env.PORT||8099);
 const ha=(process.env.HA_URL||'').replace(/\/$/,'');
 const token=process.env.HA_TOKEN||'';
 const secret=process.env.SESSION_SECRET||'';
-const proxySecret=process.env.FAMILY_HOME_PROXY_SECRET||'';
 const username=(process.env.FAMILY_HOME_USERNAME||'alexis').toLowerCase();
 if(!ha||!token||secret.length<32)throw Error('Configure HA_URL, HA_TOKEN and SESSION_SECRET before starting.');
 const attempts=new Map();
@@ -58,7 +57,7 @@ function userPasswordMatches(password,stored){
 }
 function secureRequest(req){
  // Trust proxy forwarding only when explicitly configured with a trusted proxy.
- return isSecureTransport(req,trustedProxyAddresses,proxySecret);
+ return isSecureTransport(req,trustedProxyAddresses);
 }
 function getSession(req){
  const sid=cookies(req).fh_session;
