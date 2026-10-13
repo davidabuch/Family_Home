@@ -68,9 +68,9 @@ function applyProfile(me){
  const poolLink=$('poolLink');
  if(me.pool_origin){
   poolLink.href=me.pool_origin+'/';
-  if(me.role==='admin')poolLink.onclick=event=>{
-   event.preventDefault();window.openPoolAdministrator(me.pool_origin,api,message);
-  };
+  // Pool & Spa is a separate application with its own PIN-based authorization.
+  // Navigation must never mint or transfer Family Home administrator credentials.
+  poolLink.onclick=null;
  }else{poolLink.removeAttribute('href');poolLink.onclick=event=>{event.preventDefault();message('Pool access is not configured for this Home address.')}}
 
  $('signedInProfile').classList.remove('hide');

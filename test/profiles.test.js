@@ -65,3 +65,12 @@ test('Pool link visibility persists independently of equipment permissions',()=>
   assert.equal(permitted(copy,'climate.pool_thermostat','turn_on'),false);
  }
 });
+
+
+test('Pool navigation does not transfer Family Home administrator credentials',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const js=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
+ assert.ok(js.includes("poolLink.href=me.pool_origin+'/';"));
+ assert.match(js,/poolLink\.onclick=null/);
+ assert.doesNotMatch(js,/openPoolAdministrator\(/);
+});
