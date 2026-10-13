@@ -13,7 +13,7 @@ jobs:
       - name: Verify approved icon derivatives
         run: |
           pip install Pillow==11.3.0
-          python scripts/generate_icons.py --check
+          python scripts/generate_icons.py --check && python scripts/test_icon_artwork.py
       - name: Syntax checks
         run: |
           node --check server.js

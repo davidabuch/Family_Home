@@ -27,18 +27,19 @@ test('approved icons are identical for local and remote hosts and preserve API b
    const chunks=[];res.on('data',chunk=>chunks.push(chunk));res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body:Buffer.concat(chunks)}));
   });req.on('error',reject);req.end();
  });
- const local='home-local.example.test',remote='home.example.test';
+ const local='home-local.davidbuchmd.com',remote='home.davidbuchmd.com';
  const response=await request('/manifest.webmanifest',local);
  const manifest=JSON.parse(response.body);
  assert.deepEqual(manifest.icons.map(icon=>icon.sizes),['192x192','512x512']);
  for(const page of ['/','/admin.html']){
   const html=(await request(page,remote)).body.toString();
-  assert.match(html,/rel="apple-touch-icon" sizes="180x180" href="\/icons\/approved-v1\/icon-180.png"/);
+  assert.match(html,/rel="apple-touch-icon" sizes="180x180" href="\/apple-touch-icon.png\?v=approved-v2"/);
   assert.match(html,/rel="icon" type="image\/png" sizes="32x32"/);
-  assert.doesNotMatch(html,/icon\.svg/);
+  assert.doesNotMatch(html,/icon\.svg|approved-v1/);
+  assert.match(html,/rel="apple-touch-icon-precomposed"/);
  }
  for(const size of [16,32,180,192,512]){
-  const path='/icons/approved-v1/icon-'+size+'.png';
+  const path='/icons/approved-v2/icon-'+size+'.png';
   const a=await request(path+'?local',local),b=await request(path+'?remote',remote);
   assert.equal(a.status,200);assert.equal(a.headers['content-type'],'image/png');
   assert.equal(a.headers['x-content-type-options'],'nosniff');
@@ -49,8 +50,18 @@ test('approved icons are identical for local and remote hosts and preserve API b
  }
  const favicon=await request('/favicon.ico',remote);
  assert.equal(favicon.status,200);assert.equal(favicon.headers['content-type'],'image/x-icon');
- assert.deepEqual(favicon.body,await readFile(new URL('../public/icons/approved-v1/favicon.ico',import.meta.url)));
- assert.equal((await request('/icons/approved-v1/..%2F..%2Fserver.js',local)).status,426);
+ assert.deepEqual(favicon.body,await readFile(new URL('../public/icons/approved-v2/favicon.ico',import.meta.url)));
+ for(const path of ['/apple-touch-icon.png','/apple-touch-icon-precomposed.png']){
+  const expected=await readFile(new URL('../public/icons/approved-v2/icon-180.png',import.meta.url));
+  for(const query of ['', '?v=approved-v2']){
+   const a=await request(path+query,local),b=await request(path+query,remote);
+   assert.equal(a.status,200);assert.equal(b.status,200);
+   assert.equal(a.headers['content-type'],'image/png');
+   assert.equal(a.headers['cache-control'],'no-store');
+   assert.deepEqual(a.body,expected);assert.deepEqual(b.body,expected);
+  }
+ }
+ assert.equal((await request('/icons/approved-v2/..%2F..%2Fserver.js',local)).status,426);
  assert.equal((await request('/api/profile',local)).status,426);
  assert.equal((await request('/api/login',remote,'POST')).status,426);
  assert.equal(equipmentRequests,0);

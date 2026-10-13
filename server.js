@@ -73,8 +73,9 @@ function json(res,status,data,headers={}){res.writeHead(status,{'Content-Type':'
 async function body(req){let str='';for await(const part of req){str+=part;if(str.length>4096)throw Error('Request too large')}return JSON.parse(str||'{}')}
 async function haRequest(path,method='GET',payload){const response=await fetch(ha+'/api/'+path,{method,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:payload?JSON.stringify(payload):undefined,signal:AbortSignal.timeout(7000)});if(!response.ok)throw Error('HA HTTP '+response.status);return response.json()}
 function isSameOrigin(req){const origin=req.headers.origin;const host=req.headers.host;return !origin||new URL(origin).host===host}
-const iconAssets=Object.fromEntries([16,32,180,192,512].map(size=>['/icons/approved-v1/icon-'+size+'.png','icons/approved-v1/icon-'+size+'.png']));
-iconAssets['/favicon.ico']='icons/approved-v1/favicon.ico';
+const iconAssets=Object.fromEntries([16,32,180,192,512].map(size=>['/icons/approved-v2/icon-'+size+'.png','icons/approved-v2/icon-'+size+'.png']));
+iconAssets['/favicon.ico']='icons/approved-v2/favicon.ico';
+for(const alias of ['/apple-touch-icon.png','/apple-touch-icon-precomposed.png'])iconAssets[alias]='icons/approved-v2/icon-180.png';
 const server=http.createServer(async(req,res)=>{try{
  const url=new URL(req.url,'http://localhost');const path=url.pathname;
  if(path==='/api/login'&&req.method==='POST'&&!secureRequest(req)){
