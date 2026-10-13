@@ -65,6 +65,14 @@ async function command(id,action,value){
  }
 }
 function applyProfile(me){
+ const poolLink=$('poolLink');
+ if(me.pool_origin){
+  poolLink.href=me.pool_origin+'/';
+  if(me.role==='admin')poolLink.onclick=event=>{
+   event.preventDefault();window.openPoolAdministrator(me.pool_origin,api,message);
+  };
+ }else{poolLink.removeAttribute('href');poolLink.onclick=event=>{event.preventDefault();message('Pool access is not configured for this Home address.')}}
+
  $('signedInProfile').classList.remove('hide');
  const profile=me.profile||{rooms:[]};
  permissions=Object.fromEntries(profile.rooms.flatMap(r=>r.devices.map(d=>[d.entity_id,d.actions])));
@@ -105,7 +113,7 @@ function applyProfile(me){
   section.append(title,description,link);
   app.append(section);
  }
- if(me.role!=='admin'&&me.username.toLowerCase()!=='alexis'){poolTab.classList.add('hide');pool.classList.add('hide')}
+ if(!(profile.show_pool===true || (profile.show_pool===undefined && (me.role==='admin'||me.username.toLowerCase()==='alexis')))){poolTab.classList.add('hide');pool.classList.add('hide')}
  const first=nav.querySelector('button:not(.hide)');
  if(first){first.classList.add('active');$(first.dataset.tab)?.classList.add('active')}
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
@@ -125,5 +133,3 @@ $('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reloa
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))});
 $('profileButton').onclick=()=>{const menu=$('profileMenu');menu.classList.toggle('hide');$('profileButton').setAttribute('aria-expanded',String(!menu.classList.contains('hide')))};
 show().catch(()=>{});
-
-$('poolLink').href=location.protocol+'//'+location.hostname+':8101/';

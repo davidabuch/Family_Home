@@ -31,6 +31,8 @@ async function loadProfile(){
  const id=$('member').value;if(!id)return;
  profile=(await api('admin/profile?user_id='+encodeURIComponent(id))).profile;
  $('showMusic').checked=profile.show_music===true || (profile.show_music===undefined && ['alexis','kaelah'].includes(users.find(u=>u.id===id)?.username));
+ const selectedUser=users.find(u=>u.id===id);
+ $('showPool').checked=profile.show_pool===true || (profile.show_pool===undefined && (selectedUser?.role==='admin'||selectedUser?.username==='alexis'));
  drawRooms();
 }
 function drawRooms(){
@@ -83,6 +85,7 @@ function resetSaveFeedback(){
  button.classList.remove('save-success','save-error');
 }
 $('showMusic').onchange=()=>{profile.show_music=$('showMusic').checked;resetSaveFeedback()};
+$('showPool').onchange=()=>{profile.show_pool=$('showPool').checked;resetSaveFeedback()};
 $('rooms').addEventListener('input',resetSaveFeedback);
 $('rooms').addEventListener('change',resetSaveFeedback);
 $('save').onclick=async()=>{
@@ -93,7 +96,7 @@ $('save').onclick=async()=>{
  button.classList.remove('save-success','save-error');
  button.textContent='Saving…';
  try{
-  await api('admin/profile',{method:'POST',body:JSON.stringify({user_id:$('member').value,profile:{...profile,show_music:$('showMusic').checked}})});
+  await api('admin/profile',{method:'POST',body:JSON.stringify({user_id:$('member').value,profile:{...profile,show_music:$('showMusic').checked,show_pool:$('showPool').checked}})});
   button.classList.add('save-success');
   button.textContent='✓ Saved';
   status('Room assignments saved');

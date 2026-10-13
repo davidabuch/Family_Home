@@ -20,7 +20,21 @@ options:
   session_secret: ""
   admin_username: ""
   admin_password: ""
+  proxy_secret: ""
+  trusted_proxy_ips: ""
+  public_origin: "https://home-local.davidbuchmd.com"
+  pool_handoff_secret: ""
+  pool_local_origin: "https://pool-local.davidbuchmd.com"
+  remote_origin: ""
+  pool_remote_origin: ""
 schema:
   session_secret: password
   admin_username: str?
   admin_password: password?
+  proxy_secret: password
+  trusted_proxy_ips: str?
+  public_origin: str
+  pool_handoff_secret: password
+  pool_local_origin: str
+  remote_origin: str?
+  pool_remote_origin: str?
