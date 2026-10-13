@@ -1,12 +1,15 @@
-# Family_Home
-Granular Access to our home
+# Family Home
 
-## Pool & Spa administrator handoff
+Private, per-user Home Assistant room and accessory controls. Family Home has independent user authentication, administrator-managed room/device permissions, and an optional Family Music link for authorized users.
 
-PR #10's Pool link now uses a CSRF-protected `POST /api/pool-admin-handoff` for the current enabled administrator. The ticket is returned only in a no-store JSON body and passed to the fixed Pool handoff popup using exact-origin and source-window checks. The old GET redirect with a ticket query string is rejected. Ordinary family users use the same Pool link without administrator elevation.
+## Application boundaries
 
-Configure the existing app's new `proxy_secret`, `public_origin`, `pool_local_origin`, and `pool_handoff_secret` options before a future authorized install. Forwarded HTTPS now requires both the exact trusted proxy peer and the secret; published-port callers cannot spoof HTTPS. Match the handoff secret to Pool `family_admin_handoff_secret` and Home origin to Pool `family_home_origin`. Remote origins default off and cannot route into the local boundary. Remote administrator issuance also requires explicit account `remote_access`.
+- **Family Home**: lights, fans, shades, and other approved household accessories. The administrator assigns permissions by user.
+- **Family Music**: separate application reached from the optional signed-in Music tab. Its own authentication remains independent.
+- **Pool & Spa Family**: fully standalone application. Family Home does not link to it, issue tickets, manage its PINs, or expose Pool-specific configuration or APIs.
 
-See [the Pool candidate proxy guide](https://github.com/davidabuch/Home-assistant-intellicenter/blob/feature/pool-family-home-handoff-20261012/standalone/docs/NPM_POOL_FAMILY_CONFIGURATION.md) for the reviewed topology and complete local NPM locations. NPM's host-list API denied this engineering session with 403, so existing generated rules and tunnel routes still require manual verification. No runtime configuration was changed.
+## Development
 
-Run `npm test` for all unit, browser-message and real HTTP endpoint tests. With `POOL_SOURCE` set to a Pool checkout and `PYTHON_BINARY` using its authentication dependencies, tests additionally exchange a real Home HTTP-issued ticket with the Pool request handler, check all three Pool operations, replay and session expiry, and mock every equipment call. Tests never contact live Home Assistant.
+Run `npm test` for unit and application regression tests. CI runs Node syntax checks and the complete test suite without any Pool repository dependency.
+
+The former Pool administrator-handoff prototype was retired in v0.1.34. `docs/POOL_HANDOFF_ACCEPTANCE.md` is a historical record only, not an active deployment guide.

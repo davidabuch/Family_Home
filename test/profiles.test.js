@@ -57,20 +57,12 @@ test('Family Music link is restricted to signed-in Alexis and Kaelah',async()=>{
  assert.doesNotMatch(html,/music\.davidbuchmd\.com/);
 });
 
-test('Pool link visibility persists independently of equipment permissions',()=>{
- const profile=seedAlexis();
- for(const show_pool of [true,false]){
-  const copy=sanitizeProfile({...profile,show_pool});assert.equal(copy.show_pool,show_pool);
-  assert.deepEqual([...profileEntities(copy)],[...profileEntities(profile)]);
-  assert.equal(permitted(copy,'climate.pool_thermostat','turn_on'),false);
- }
-});
-
-
-test('Pool navigation does not transfer Family Home administrator credentials',async()=>{
+test('Family Home does not expose Pool integration',async()=>{
  const {readFile}=await import('node:fs/promises');
- const js=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
- assert.ok(js.includes("poolLink.href=me.pool_origin+'/';"));
- assert.match(js,/poolLink\.onclick=null/);
- assert.doesNotMatch(js,/openPoolAdministrator\(/);
+ for(const path of ['../public/app.js','../public/index.html','../public/admin.js','../public/admin.html','../server.js']){
+  const source=await readFile(new URL(path,import.meta.url),'utf8');
+  assert.doesNotMatch(source,/poolLink|showPool|pool-admin-handoff|pool_origin|Pool & Spa/i);
+ }
+ const profile=sanitizeProfile({...seedAlexis(),show_pool:true});
+ assert.equal(Object.hasOwn(profile,'show_pool'),false);
 });

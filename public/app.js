@@ -65,29 +65,20 @@ async function command(id,action,value){
  }
 }
 function applyProfile(me){
- const poolLink=$('poolLink');
- if(me.pool_origin){
-  poolLink.href=me.pool_origin+'/';
-  // Pool & Spa is a separate application with its own PIN-based authorization.
-  // Navigation must never mint or transfer Family Home administrator credentials.
-  poolLink.onclick=null;
- }else{poolLink.removeAttribute('href');poolLink.onclick=event=>{event.preventDefault();message('Pool access is not configured for this Home address.')}}
-
  $('signedInProfile').classList.remove('hide');
  const profile=me.profile||{rooms:[]};
  permissions=Object.fromEntries(profile.rooms.flatMap(r=>r.devices.map(d=>[d.entity_id,d.actions])));
  const app=$('app'),nav=app.querySelector('.tabs');
- const pool=$('pool'),poolTab=nav.querySelector('[data-tab="pool"]');
- for(const el of [...app.querySelectorAll('.section')])if(el!==pool)el.remove();
- for(const el of [...nav.querySelectorAll('button')])if(el!==poolTab)el.remove();
+ for(const el of [...app.querySelectorAll('.section')])el.remove();
+ for(const el of [...nav.querySelectorAll('button')])el.remove();
  groups={};
  for(const [index,room] of profile.rooms.entries()){
   const id='userroom'+index,gridId=id+'Tiles';
-  const tab=document.createElement('button');tab.dataset.tab=id;tab.textContent=room.name;nav.insertBefore(tab,poolTab);
+  const tab=document.createElement('button');tab.dataset.tab=id;tab.textContent=room.name;nav.append(tab);
   const section=document.createElement('section');section.className='section';section.id=id;
   const title=document.createElement('h2');title.textContent=room.name;
   const grid=document.createElement('div');grid.className='grid';grid.id=gridId;
-  section.append(title,grid);app.insertBefore(section,pool);
+  section.append(title,grid);app.append(section);
   groups[gridId]=room.devices.map(d=>[d.name,d.entity_id,'']);
  }
  // Music is a link to the separate authenticated Family Music application.
@@ -113,7 +104,6 @@ function applyProfile(me){
   section.append(title,description,link);
   app.append(section);
  }
- if(!(profile.show_pool===true || (profile.show_pool===undefined && (me.role==='admin'||me.username.toLowerCase()==='alexis')))){poolTab.classList.add('hide');pool.classList.add('hide')}
  const first=nav.querySelector('button:not(.hide)');
  if(first){first.classList.add('active');$(first.dataset.tab)?.classList.add('active')}
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{

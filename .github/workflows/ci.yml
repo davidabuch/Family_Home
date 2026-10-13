@@ -7,26 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: davidabuch/Home-assistant-intellicenter
-          ref: 081d4b4241f164516dfa5849979ffd3dedcdc90f
-          path: _pool
-          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - name: Install isolated Pool authentication test dependencies
-        run: pip install -r _pool/standalone/requirements.txt
       - name: Syntax checks
         run: |
           node --check server.js
           node --check public/app.js
-          node --check public/pool-handoff.js
-          node --check lib/pool-handoff.js
           node --check family_home/start.mjs
           node --check lib/permissions.js
           node --check public/admin.js
@@ -34,8 +21,5 @@ jobs:
           node --check lib/database.js
           node --check lib/profiles.js
           node --check lib/admin.js
-      - name: Unit and cross-application HTTP integration tests
-        env:
-          POOL_SOURCE: ${{ github.workspace }}/_pool
-          PYTHON_BINARY: python
+      - name: Family Home regression tests
         run: npm test
