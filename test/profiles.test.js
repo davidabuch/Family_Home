@@ -70,7 +70,7 @@ test('Pool link visibility persists independently of equipment permissions',()=>
 test('Pool navigation does not transfer Family Home administrator credentials',async()=>{
  const {readFile}=await import('node:fs/promises');
  const js=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
- assert.match(js,/poolLink\.href=me\.pool_origin\+'\\/'/);
+ assert.ok(js.includes("poolLink.href=me.pool_origin+'/';"));
  assert.match(js,/poolLink\.onclick=null/);
  assert.doesNotMatch(js,/openPoolAdministrator\(/);
 });
