@@ -1,5 +1,5 @@
 name: Family Home
-version: "0.1.34"
+version: "0.1.35"
 slug: family_home
 description: Private family room controls with per-user administration
 url: https://github.com/davidabuch/Family_Home
@@ -20,7 +20,6 @@ options:
   session_secret: ""
   admin_username: ""
   admin_password: ""
-  proxy_secret: ""
   trusted_proxy_ips: ""
   public_origin: "https://home-local.davidbuchmd.com"
   remote_origin: ""
@@ -28,7 +27,6 @@ schema:
   session_secret: password
   admin_username: str?
   admin_password: password?
-  proxy_secret: password
   trusted_proxy_ips: str?
   public_origin: str
   remote_origin: str?
