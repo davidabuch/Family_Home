@@ -3,7 +3,6 @@ import {readFile} from 'node:fs/promises';
 import {randomBytes,scryptSync,timingSafeEqual} from 'node:crypto';
 import {serviceFor} from './lib/permissions.js';
 import {loadDatabase,saveDatabase} from './lib/database.js';
-import {issuePoolTicket,poolDestination} from './lib/pool-handoff.js';
 import {isSecureTransport} from './lib/transport.js';
 import {passwordHash,passwordMatches,createSession,resolveSession,revokeUserSessions} from './lib/auth.js';
 import {createUser,setProfile,disableUser,changePassword,listUsers,requireAdmin} from './lib/admin.js';
@@ -12,8 +11,6 @@ const port=Number(process.env.PORT||8099);
 const ha=(process.env.HA_URL||'').replace(/\/$/,'');
 const token=process.env.HA_TOKEN||'';
 const secret=process.env.SESSION_SECRET||'';
-const poolHandoffSecret=process.env.POOL_HANDOFF_SECRET||'';
-const poolConfig={homeOrigin:process.env.FAMILY_HOME_PUBLIC_ORIGIN||'https://home-local.davidbuchmd.com',poolOrigin:process.env.POOL_LOCAL_ORIGIN||'https://pool-local.davidbuchmd.com',remoteHomeOrigin:process.env.FAMILY_HOME_REMOTE_ORIGIN||'',remotePoolOrigin:process.env.POOL_REMOTE_ORIGIN||''};
 const proxySecret=process.env.FAMILY_HOME_PROXY_SECRET||'';
 const username=(process.env.FAMILY_HOME_USERNAME||'alexis').toLowerCase();
 if(!ha||!token||secret.length<32)throw Error('Configure HA_URL, HA_TOKEN and SESSION_SECRET before starting.');
@@ -88,7 +85,7 @@ const server=http.createServer(async(req,res)=>{try{
   }));
  }
 
- if(req.method==='GET'&&['/','/index.html','/manifest.webmanifest','/app.js','/pool-handoff.js','/admin.html','/admin.js'].includes(path)){const name=path==='/manifest.webmanifest'?'manifest.webmanifest':path==='/app.js'?'app.js':path==='/pool-handoff.js'?'pool-handoff.js':path==='/admin.html'?'admin.html':path==='/admin.js'?'admin.js':'index.html';const data=await readFile(new URL('./public/'+name,import.meta.url));res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.js')?'text/javascript; charset=utf-8':'application/manifest+json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(data);return}
+ if(req.method==='GET'&&['/','/index.html','/manifest.webmanifest','/app.js','/admin.html','/admin.js'].includes(path)){const name=path==='/manifest.webmanifest'?'manifest.webmanifest':path==='/app.js'?'app.js':path==='/pool-handoff.js'?'pool-handoff.js':path==='/admin.html'?'admin.html':path==='/admin.js'?'admin.js':'index.html';const data=await readFile(new URL('./public/'+name,import.meta.url));res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.js')?'text/javascript; charset=utf-8':'application/manifest+json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(data);return}
  if(path==='/api/health'&&req.method==='GET')return json(res,200,{ok:true});
  if(path==='/api/login'&&req.method==='POST'){
   if(!isSameOrigin(req))return json(res,403,{error:'Origin rejected'});
@@ -106,22 +103,7 @@ const server=http.createServer(async(req,res)=>{try{
  }
  if(!secureRequest(req))return json(res,426,{error:'HTTPS required'});
  const session=getSession(req);if(!session)return json(res,401,{error:'Login required'});
- if(path==='/api/pool-admin-handoff'){
-  if(req.method!=='POST')return json(res,405,{error:'POST required'},{Allow:'POST'});
-  const origin=req.headers.origin,destination=poolDestination(origin,poolConfig);
-  if(!destination||!isSameOrigin(req)||req.headers['sec-fetch-site']==='cross-site'
-     ||typeof session.csrf!=='string'||session.csrf.length!==64
-     ||req.headers['x-csrf-token']!==session.csrf)return json(res,403,{error:'Forbidden'});
-  if(req.headers['content-type']?.split(';')[0]!=='application/json')return json(res,415,{error:'JSON required'});
-  const remote=origin!==poolConfig.homeOrigin;
-  if((remote&&req.headers['x-family-boundary']!=='remote')||(!remote&&req.headers['x-family-boundary']!=='local')
-     ||(remote&&session.user.remote_access!==true))return json(res,403,{error:'Forbidden'});
-  try{
-   const ticket=issuePoolTicket(session,poolHandoffSecret);
-   return json(res,200,{ticket,pool_origin:destination},{'Referrer-Policy':'no-referrer'});
-  }catch{return json(res,403,{error:'Pool administrator handoff unavailable'})}
- }
- if(path==='/api/me'&&req.method==='GET')return json(res,200,{username:session.user.username,display_name:session.user.display_name,role:session.user.role,csrf:session.csrf,pool_origin:poolDestination('https://'+req.headers.host,poolConfig),profile:db.profiles[session.user.id]||{rooms:[]}});
+ if(path==='/api/me'&&req.method==='GET')return json(res,200,{username:session.user.username,display_name:session.user.display_name,role:session.user.role,csrf:session.csrf,profile:db.profiles[session.user.id]||{rooms:[]}});
  if(path==='/api/logout'&&req.method==='POST'){if(!isSameOrigin(req)||req.headers['x-csrf-token']!==session.csrf)return json(res,403,{error:'Forbidden'});db.sessions=db.sessions.filter(s=>s.id!==session.id);await persist();return json(res,200,{ok:true},{'Set-Cookie':'fh_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0'})}
  if(path==='/api/states'&&req.method==='GET'){const states=await haRequest('states');return json(res,200,{states:states.filter(s=>profileEntities(db.profiles[session.user.id]||{rooms:[]}).has(s.entity_id)).map(s=>({entity_id:s.entity_id,state:s.state,attributes:{friendly_name:s.attributes?.friendly_name,current_position:s.attributes?.current_position,supported_features:s.attributes?.supported_features,supported_color_modes:s.attributes?.supported_color_modes,brightness:s.attributes?.brightness,percentage:s.attributes?.percentage,percentage_step:s.attributes?.percentage_step,device_class:s.attributes?.device_class}}))})}
  if(path==='/api/action'&&req.method==='POST'){if(!isSameOrigin(req)||req.headers['x-csrf-token']!==session.csrf)return json(res,403,{error:'Forbidden'});const {entity_id,action,value}=await body(req);if(typeof entity_id!=='string'||typeof action!=='string'||!permitted(db.profiles[session.user.id],entity_id,action))return json(res,403,{error:'Action not permitted'});const live=await haRequest('states/'+encodeURIComponent(entity_id));if(!allowedActions(entity_id,live.attributes).includes(action))return json(res,403,{error:'Action unavailable for device'});const service=serviceFor(entity_id,action)||{domain:entity_id.split('.')[0],service:action==='set_brightness'?'turn_on':action==='set_position'?'set_cover_position':action};const payload={entity_id};if(action==='set_brightness'||action==='set_position'||action==='set_percentage'){if(!Number.isInteger(value)||value<1&&action==='set_brightness'||value<0||value>100)return json(res,400,{error:'Position/brightness must be an integer from 0 to 100 (brightness 1 to 100)'});if(action==='set_brightness')payload.brightness_pct=value;else if(action==='set_percentage')payload.percentage=value;else payload.position=value;}await haRequest('services/'+service.domain+'/'+service.service,'POST',payload);return json(res,200,{ok:true})}
