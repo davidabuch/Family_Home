@@ -23,3 +23,5 @@ jobs:
           node --check lib/admin.js
       - name: Family Home regression tests
         run: npm test
+      - name: Reproduce stale image cache and verify version-keyed packaging
+        run: python3 scripts/test_build_cache.py
