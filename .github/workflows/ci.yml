@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: davidabuch/Home-assistant-intellicenter
-          ref: feature/pool-family-home-handoff-20261012
+          ref: 081d4b4241f164516dfa5849979ffd3dedcdc90f
           path: _pool
           persist-credentials: false
       - uses: actions/setup-node@v4
