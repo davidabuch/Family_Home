@@ -56,3 +56,12 @@ test('Family Music link is restricted to signed-in Alexis and Kaelah',async()=>{
  assert.match(js,/link\.rel='noopener noreferrer'/);
  assert.doesNotMatch(html,/music\.davidbuchmd\.com/);
 });
+
+test('Pool link visibility persists independently of equipment permissions',()=>{
+ const profile=seedAlexis();
+ for(const show_pool of [true,false]){
+  const copy=sanitizeProfile({...profile,show_pool});assert.equal(copy.show_pool,show_pool);
+  assert.deepEqual([...profileEntities(copy)],[...profileEntities(profile)]);
+  assert.equal(permitted(copy,'climate.pool_thermostat','turn_on'),false);
+ }
+});

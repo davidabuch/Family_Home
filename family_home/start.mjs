@@ -10,17 +10,19 @@ process.env.FAMILY_HOME_DB_PATH='/data/family-home.json';
 process.env.HA_URL='http://supervisor/core';
 process.env.HA_TOKEN=process.env.SUPERVISOR_TOKEN||'';
 process.env.PORT='8099';
-// Resolve the local Nginx Proxy Manager add-on; never trust arbitrary client forwarding headers.
-// If the proxy is unavailable, HTTPS authentication fails closed until the app is restarted.
+process.env.FAMILY_HOME_PROXY_SECRET=opts.proxy_secret||'';
+process.env.FAMILY_HOME_PUBLIC_ORIGIN=opts.public_origin||'https://home-local.davidbuchmd.com';
+process.env.POOL_HANDOFF_SECRET=opts.pool_handoff_secret||'';
+process.env.POOL_LOCAL_ORIGIN=opts.pool_local_origin||'https://pool-local.davidbuchmd.com';
+process.env.FAMILY_HOME_REMOTE_ORIGIN=opts.remote_origin||'';
+process.env.POOL_REMOTE_ORIGIN=opts.pool_remote_origin||'';
+// Prefer NPM's container-to-container route. Never implicitly trust a shared NAT gateway.
 try {
  const addresses=await lookup('a0d7b954-nginxproxymanager',{all:true});
- // HA Supervisor's published add-on port is reached through its internal gateway.
- // Trust this fixed HA add-on ingress gateway in addition to NPM's resolved addresses.
- // This does not trust arbitrary X-Forwarded-For client addresses.
- process.env.FAMILY_HOME_TRUSTED_PROXY_IPS=[...addresses.map(a=>a.address),'172.30.32.1'].join(',');
-} catch(err) {
- console.error('Trusted reverse proxy DNS unavailable; forwarded HTTPS disabled.');
- process.env.FAMILY_HOME_TRUSTED_PROXY_IPS='';
+ process.env.FAMILY_HOME_TRUSTED_PROXY_IPS=opts.trusted_proxy_ips||addresses.map(a=>a.address).join(',');
+} catch {
+ process.env.FAMILY_HOME_TRUSTED_PROXY_IPS=opts.trusted_proxy_ips||'';
+ console.error('Trusted reverse proxy DNS unavailable; explicit proxy IPs required.');
 }
 if(!process.env.HA_TOKEN){console.error('Supervisor token unavailable; homeassistant_api must be enabled.');process.exit(1)}
 await import('./server.js');
