@@ -73,6 +73,8 @@ function json(res,status,data,headers={}){res.writeHead(status,{'Content-Type':'
 async function body(req){let str='';for await(const part of req){str+=part;if(str.length>4096)throw Error('Request too large')}return JSON.parse(str||'{}')}
 async function haRequest(path,method='GET',payload){const response=await fetch(ha+'/api/'+path,{method,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:payload?JSON.stringify(payload):undefined,signal:AbortSignal.timeout(7000)});if(!response.ok)throw Error('HA HTTP '+response.status);return response.json()}
 function isSameOrigin(req){const origin=req.headers.origin;const host=req.headers.host;return !origin||new URL(origin).host===host}
+const iconAssets=Object.fromEntries([16,32,180,192,512].map(size=>['/icons/approved-v1/icon-'+size+'.png','icons/approved-v1/icon-'+size+'.png']));
+iconAssets['/favicon.ico']='icons/approved-v1/favicon.ico';
 const server=http.createServer(async(req,res)=>{try{
  const url=new URL(req.url,'http://localhost');const path=url.pathname;
  if(path==='/api/login'&&req.method==='POST'&&!secureRequest(req)){
@@ -84,7 +86,7 @@ const server=http.createServer(async(req,res)=>{try{
   }));
  }
 
- if(req.method==='GET'&&['/','/index.html','/manifest.webmanifest','/app.js','/admin.html','/admin.js'].includes(path)){const name=path==='/manifest.webmanifest'?'manifest.webmanifest':path==='/app.js'?'app.js':path==='/admin.html'?'admin.html':path==='/admin.js'?'admin.js':'index.html';const data=await readFile(new URL('./public/'+name,import.meta.url));res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.js')?'text/javascript; charset=utf-8':'application/manifest+json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(data);return}
+ if(req.method==='GET'&&['/','/index.html','/manifest.webmanifest','/app.js','/admin.html','/admin.js',...Object.keys(iconAssets)].includes(path)){const name=iconAssets[path]|| (path==='/manifest.webmanifest'?'manifest.webmanifest':path==='/app.js'?'app.js':path==='/admin.html'?'admin.html':path==='/admin.js'?'admin.js':'index.html');const data=await readFile(new URL('./public/'+name,import.meta.url));res.writeHead(200,{'Content-Type':name.endsWith('.png')?'image/png':name.endsWith('.ico')?'image/x-icon':name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.js')?'text/javascript; charset=utf-8':'application/manifest+json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(data);return}
  if(path==='/api/health'&&req.method==='GET')return json(res,200,{ok:true});
  if(path==='/api/login'&&req.method==='POST'){
   if(!isSameOrigin(req))return json(res,403,{error:'Origin rejected'});
