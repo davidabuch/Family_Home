@@ -163,4 +163,21 @@ body::before{background-image:linear-gradient(180deg,rgba(51,39,33,.30),rgba(70,
  .tile,.tile:not(.on){background:rgba(42,47,52,.93)!important}
  .tile.on{background:rgba(225,240,253,.98)!important}
 }
+
+/* v0.1.42: keep the HomeKit-like colored accessory glyph on white ON tiles.
+   Explicit SVG color is necessary to override an older .tile.on .tileIcon svg rule. */
+.tile.on .tileIcon{
+ background:rgba(255,255,255,.92);
+ border:1px solid rgba(255,255,255,.95);
+ color:var(--active-color,#1689ee);
+ box-shadow:0 2px 9px rgba(30,56,79,.12);
+}
+.tile.on .tileIcon svg{
+ color:var(--active-color,#1689ee);
+ stroke:currentColor;
+}
+.tile.on[data-kind="light"] .tileIcon svg .bulb-fill{
+ fill:currentColor;
+ stroke:currentColor;
+}
 </style><link rel="icon" type="image/png" sizes="32x32" href="/icons/approved-v2/icon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="/icons/approved-v2/icon-16.png"><link rel="shortcut icon" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=approved-v2"><link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon-precomposed.png?v=approved-v2"></head><body><main class="wrap"><header><div><div class="eyebrow">FAMILY HOME</div><h1>Buch Family Home</h1></div><div class="profile hide" id="signedInProfile"><button id="profileButton" class="avatar" aria-label="Account menu" aria-expanded="false">A</button><div id="profileMenu" class="profileMenu hide"><button id="logout">Sign out</button></div></div></header><div id="login" class="card"><h2>Welcome home</h2><p>Sign in to view and control your approved devices.</p><form id="loginForm"><input id="user" autocomplete="username" placeholder="Username" required><input id="pass" type="password" autocomplete="current-password" placeholder="Password" required><button class="btn">Sign in</button></form></div><div id="app" class="hide"><div class="connection">Home Assistant connected · <span id="updated">Connecting</span></div><nav class="tabs"><button class="active" data-tab="room">My Room</button><button data-tab="shared">Shared Areas</button><button data-tab="oliver">Oliver's Room</button></nav><div id="feedback" role="status"></div><section class="section active" id="room"><h2>Lights & Comfort</h2><div class="grid" id="roomTiles"></div></section><section class="section" id="shared"><h2>Shared Main Lights</h2><div class="grid" id="sharedTiles"></div><p>Main Lutron lights only; no cabinets.</p></section><section class="section" id="oliver"><h2>Oliver's Room</h2><div class="grid" id="oliverTiles"></div></section></div><div id="levelPanel" class="levelPanel hide" role="dialog" aria-modal="true" aria-labelledby="levelTitle"><div class="levelBox"><h2 id="levelTitle">Adjust</h2><strong id="levelValue">50%</strong><input id="levelSlider" type="range" min="0" max="100" step="1" aria-label="Brightness, fan speed, or shade position"><div class="levelActions"><button class="btn" id="levelClose">Cancel</button><button class="btn" id="levelApply">Set level</button></div></div></div><footer class="sub" style="margin-top:35px">Family Home</footer></main><script src="/app.js" defer></script></body></html>
