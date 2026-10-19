@@ -43,4 +43,44 @@ h1,h2{color:#fff;text-shadow:0 1px 5px rgba(34,75,110,.18)}
 @keyframes familyHomeFanSpin{to{transform:rotate(360deg)}}
 .tile[data-kind="fan"].on .fan-blades{transform-origin:12px 12px;animation:familyHomeFanSpin 1.65s linear infinite}
 @media(prefers-reduced-motion:reduce){.tile[data-kind="fan"].on .fan-blades{animation:none!important}}
+/* Sculptural White — decorative, non-interactive architectural backdrop. */
+:root{color-scheme:light}
+body{background:#e7dfd4!important;color:#302b28;position:relative;isolation:isolate}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,rgba(51,39,33,.28),rgba(70,54,45,.08) 38%,rgba(46,36,31,.30) 100%),url('/sculptural-white.svg') center center/cover no-repeat}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(247,238,225,.04),transparent 35%,rgba(64,46,33,.16))}
+header{padding:7px 4px 10px}h1,h2{color:#fff!important;text-shadow:0 2px 12px rgba(32,27,24,.52)!important}
+h1{font-size:29px;letter-spacing:-.9px}.eyebrow,.connection{color:#fff!important;text-shadow:0 1px 9px #30251bb0}
+.connection:before{background:#a2e4ba}
+.section h2{font-size:17px;margin:20px 0 12px}
+.grid{gap:11px}
+.tile,.tile:not(.on){height:88px;min-height:88px;border-radius:21px;background:rgba(92,79,70,.32)!important;border:1px solid rgba(255,255,255,.45)!important;box-shadow:0 8px 23px rgba(48,34,24,.13),inset 0 1px rgba(255,255,255,.28);backdrop-filter:blur(22px) saturate(155%);-webkit-backdrop-filter:blur(22px) saturate(155%);color:white}
+.tile:not(.on) .tileIcon{background:rgba(255,255,255,.20);color:#fff}
+.tile:not(.on) strong,.tile:not(.on) small{color:#fff}
+.tile.on{background:rgba(236,246,253,.83)!important;border-color:rgba(255,255,255,.92)!important;color:#24303c;box-shadow:0 8px 24px rgba(35,35,40,.13),inset 0 1px #fff;backdrop-filter:blur(19px) saturate(140%);-webkit-backdrop-filter:blur(19px) saturate(140%)}
+.tile.on strong{color:#202832}.tile.on small{color:#546371}
+.tile.on .tileIcon{box-shadow:0 2px 10px #00000017}
+.tabs{background:rgba(247,241,234,.87)!important;border-top:1px solid #ffffffb8;box-shadow:0 -5px 24px #3a2d2219;backdrop-filter:blur(25px) saturate(145%);-webkit-backdrop-filter:blur(25px) saturate(145%)}
+.tabs button{color:#6f6c69}.tabs button.active{color:#087bea;background:rgba(255,255,255,.48)}
+.avatar{background:rgba(255,255,255,.8);color:#51443c}
+.profileMenu{background:#f5eee7;color:#2d2a27}.profileMenu button{color:#2d2a27}
+.card,.levelBox{background:rgba(250,247,242,.91);color:#2d2a27;border:1px solid #fff9;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.card p,.sub{color:#fff;text-shadow:0 1px 8px #3b302ba8}.card p{color:#5e5650;text-shadow:none}
+.card input{background:#fff;color:#2d2a27;border-color:#b9afa5}.btn{background:#fff;color:#33404a;border-color:#d4c8bb}
+.levelBox input{accent-color:#087bea}
+.section>p{color:#fff;text-shadow:0 1px 8px #3b302b}
+@media(min-width:700px){body::before{background-position:center 42%}}
+@media(prefers-reduced-transparency:reduce){.tile,.tile:not(.on){background:rgba(75,66,59,.89)!important}.tile.on{background:#f1f6fa!important}.tabs{background:#f3ede6!important}}
+/* iPhone tab pictograms; CSS-only so existing tab events remain untouched. */
+.tabs button::before{content:"";width:23px;height:23px;display:block;background:currentColor;mask-size:contain;mask-repeat:no-repeat;mask-position:center;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center}
+.tabs button[data-tab="room"]::before{mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2 1 11h3v11h7v-7h3v7h7V11h3L12 2Z'/%3E%3C/svg%3E");-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2 1 11h3v11h7v-7h3v7h7V11h3L12 2Z'/%3E%3C/svg%3E")}
+.tabs button[data-tab="shared"]::before{mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 0a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM8 14c-4 0-7 2-7 6v2h14v-2c0-4-3-6-7-6Zm8 0c-.7 0-1.4.1-2 .3 2 1.5 3 3.4 3 5.7v2h6v-2c0-4-3-6-7-6Z'/%3E%3C/svg%3E");-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 0a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM8 14c-4 0-7 2-7 6v2h14v-2c0-4-3-6-7-6Zm8 0c-.7 0-1.4.1-2 .3 2 1.5 3 3.4 3 5.7v2h6v-2c0-4-3-6-7-6Z'/%3E%3C/svg%3E")}
+.tabs button[data-tab="oliver"]::before{mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M3 3h2v10h14V7h2v14h-2v-4H5v4H3V3Zm3 4h7a4 4 0 0 1 4 4v1H6V7Z'/%3E%3C/svg%3E");-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M3 3h2v10h14V7h2v14h-2v-4H5v4H3V3Zm3 4h7a4 4 0 0 1 4 4v1H6V7Z'/%3E%3C/svg%3E")}
+.tabs button{gap:5px;min-height:54px}
+@media(max-width:370px){.tile{padding:9px 8px;gap:7px}.tileIcon{width:38px;height:38px}.tile strong{font-size:12px}}
+/* Photo-ready scene layers. The SVG remains a working fallback until the approved
+   optimized WebP assets are committed and served. Backgrounds are decorative. */
+body{--family-scene:url('/family-home-my-room.webp')}
+body[data-scene="shared"]{--family-scene:url('/family-home-shared-areas.webp')}
+body[data-scene="oliver"]{--family-scene:url('/family-home-olivers-room.webp')}
+body::before{background-image:linear-gradient(180deg,rgba(51,39,33,.30),rgba(70,54,45,.08) 38%,rgba(46,36,31,.30) 100%),var(--family-scene),url('/sculptural-white.svg');background-position:center,center,center;background-size:cover,cover,cover;background-repeat:no-repeat}
 </style><link rel="icon" type="image/png" sizes="32x32" href="/icons/approved-v2/icon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="/icons/approved-v2/icon-16.png"><link rel="shortcut icon" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=approved-v2"><link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon-precomposed.png?v=approved-v2"></head><body><main class="wrap"><header><div><div class="eyebrow">FAMILY HOME</div><h1>Buch Family Home</h1></div><div class="profile hide" id="signedInProfile"><button id="profileButton" class="avatar" aria-label="Account menu" aria-expanded="false">A</button><div id="profileMenu" class="profileMenu hide"><button id="logout">Sign out</button></div></div></header><div id="login" class="card"><h2>Welcome home</h2><p>Sign in to view and control your approved devices.</p><form id="loginForm"><input id="user" autocomplete="username" placeholder="Username" required><input id="pass" type="password" autocomplete="current-password" placeholder="Password" required><button class="btn">Sign in</button></form></div><div id="app" class="hide"><div class="connection">Home Assistant connected · <span id="updated">Connecting</span></div><nav class="tabs"><button class="active" data-tab="room">My Room</button><button data-tab="shared">Shared Areas</button><button data-tab="oliver">Oliver's Room</button></nav><div id="feedback" role="status"></div><section class="section active" id="room"><h2>Lights & Comfort</h2><div class="grid" id="roomTiles"></div></section><section class="section" id="shared"><h2>Shared Main Lights</h2><div class="grid" id="sharedTiles"></div><p>Main Lutron lights only; no cabinets.</p></section><section class="section" id="oliver"><h2>Oliver's Room</h2><div class="grid" id="oliverTiles"></div></section></div><div id="levelPanel" class="levelPanel hide" role="dialog" aria-modal="true" aria-labelledby="levelTitle"><div class="levelBox"><h2 id="levelTitle">Adjust</h2><strong id="levelValue">50%</strong><input id="levelSlider" type="range" min="0" max="100" step="1" aria-label="Brightness, fan speed, or shade position"><div class="levelActions"><button class="btn" id="levelClose">Cancel</button><button class="btn" id="levelApply">Set level</button></div></div></div><footer class="sub" style="margin-top:35px">Family Home</footer></main><script src="/app.js" defer></script></body></html>
