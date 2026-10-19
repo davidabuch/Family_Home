@@ -74,7 +74,12 @@ function applyProfile(me){
  groups={};
  for(const [index,room] of profile.rooms.entries()){
   const id='userroom'+index,gridId=id+'Tiles';
-  const tab=document.createElement('button');tab.dataset.tab=id;tab.textContent=room.name;nav.append(tab);
+  const tab=document.createElement('button');tab.dataset.tab=id;tab.textContent=room.name;
+  const glyph=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  glyph.setAttribute('class','familyNavGlyph');glyph.setAttribute('viewBox','0 0 24 24');glyph.setAttribute('aria-hidden','true');
+  const lower=room.name.toLowerCase();
+  const shape=/music/.test(lower)?'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>':/oliver|bed|sleep/.test(lower)?'<path d="M3 4v16M3 16h18v4M3 11h18v5H3zM6 8h5a3 3 0 0 1 3 3"/>':/shared|main|living|common|kitchen/.test(lower)?'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20v-2a7 7 0 0 1 14 0v2M17 15a5 5 0 0 1 5 5"/>':'<path d="m3 11 9-8 9 8v10h-7v-7h-4v7H3z"/>';
+  glyph.innerHTML=shape;tab.prepend(glyph);nav.append(tab);
   const section=document.createElement('section');section.className='section';section.id=id;
   const title=document.createElement('h2');title.textContent=room.name;
   const grid=document.createElement('div');grid.className='grid';grid.id=gridId;

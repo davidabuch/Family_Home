@@ -83,4 +83,37 @@ body{--family-scene:url('/family-home-my-room.webp')}
 body[data-scene="shared"]{--family-scene:url('/family-home-shared-areas.webp')}
 body[data-scene="oliver"]{--family-scene:url('/family-home-olivers-room.webp')}
 body::before{background-image:linear-gradient(180deg,rgba(51,39,33,.30),rgba(70,54,45,.08) 38%,rgba(46,36,31,.30) 100%),var(--family-scene),url('/sculptural-white.svg');background-position:center,center,center;background-size:cover,cover,cover;background-repeat:no-repeat}
+
+/* v0.1.40 glass refinement: clear neutral surfaces, thin specular rims,
+   profile-generated navigation icons (not fixed data-tab names). */
+.tile,.tile:not(.on){
+ background:linear-gradient(135deg,rgba(255,255,255,.23),rgba(244,248,252,.11) 62%,rgba(255,255,255,.19))!important;
+ border:1px solid rgba(255,255,255,.32)!important;
+ box-shadow:0 8px 24px rgba(27,23,22,.12),inset 0 1px rgba(255,255,255,.47);
+ -webkit-backdrop-filter:blur(13px) saturate(115%) brightness(1.12);
+ backdrop-filter:blur(13px) saturate(115%) brightness(1.12);
+}
+.tile.on{
+ background:linear-gradient(135deg,rgba(185,220,251,.72),rgba(213,233,255,.54))!important;
+ border:1px solid rgba(238,249,255,.72)!important;
+ box-shadow:0 7px 24px rgba(24,77,135,.16),inset 0 1px rgba(255,255,255,.85);
+ -webkit-backdrop-filter:blur(15px) saturate(140%);
+ backdrop-filter:blur(15px) saturate(140%);
+}
+.tile:not(.on) .tileIcon{background:rgba(255,255,255,.13);color:#fff}
+.tile.on .tileIcon{background:#1684f5;color:white;box-shadow:0 2px 12px rgba(17,118,238,.24)}
+.tile{height:79px;min-height:79px;border-radius:19px;padding:9px 10px}
+.grid{gap:9px}
+.tile strong{font-size:13px;line-height:1.2}
+.tile small{font-size:11px}
+.tabs{background:rgba(244,240,235,.77)!important;border-top:1px solid rgba(255,255,255,.55)}
+.tabs button{font-size:10px;gap:5px;min-height:55px}
+.tabs button.active{background:transparent!important;color:#087bea}
+.tabs button::before{content:none!important;display:none!important}
+.tabs button .familyNavGlyph{width:22px;height:22px;display:block;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs button.active .familyNavGlyph{stroke-width:2.2}
+@media(prefers-reduced-transparency:reduce){
+ .tile,.tile:not(.on){background:rgba(71,68,65,.9)!important}
+ .tile.on{background:rgba(207,232,252,.98)!important}
+}
 </style><link rel="icon" type="image/png" sizes="32x32" href="/icons/approved-v2/icon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="/icons/approved-v2/icon-16.png"><link rel="shortcut icon" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=approved-v2"><link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon-precomposed.png?v=approved-v2"></head><body><main class="wrap"><header><div><div class="eyebrow">FAMILY HOME</div><h1>Buch Family Home</h1></div><div class="profile hide" id="signedInProfile"><button id="profileButton" class="avatar" aria-label="Account menu" aria-expanded="false">A</button><div id="profileMenu" class="profileMenu hide"><button id="logout">Sign out</button></div></div></header><div id="login" class="card"><h2>Welcome home</h2><p>Sign in to view and control your approved devices.</p><form id="loginForm"><input id="user" autocomplete="username" placeholder="Username" required><input id="pass" type="password" autocomplete="current-password" placeholder="Password" required><button class="btn">Sign in</button></form></div><div id="app" class="hide"><div class="connection">Home Assistant connected · <span id="updated">Connecting</span></div><nav class="tabs"><button class="active" data-tab="room">My Room</button><button data-tab="shared">Shared Areas</button><button data-tab="oliver">Oliver's Room</button></nav><div id="feedback" role="status"></div><section class="section active" id="room"><h2>Lights & Comfort</h2><div class="grid" id="roomTiles"></div></section><section class="section" id="shared"><h2>Shared Main Lights</h2><div class="grid" id="sharedTiles"></div><p>Main Lutron lights only; no cabinets.</p></section><section class="section" id="oliver"><h2>Oliver's Room</h2><div class="grid" id="oliverTiles"></div></section></div><div id="levelPanel" class="levelPanel hide" role="dialog" aria-modal="true" aria-labelledby="levelTitle"><div class="levelBox"><h2 id="levelTitle">Adjust</h2><strong id="levelValue">50%</strong><input id="levelSlider" type="range" min="0" max="100" step="1" aria-label="Brightness, fan speed, or shade position"><div class="levelActions"><button class="btn" id="levelClose">Cancel</button><button class="btn" id="levelApply">Set level</button></div></div></div><footer class="sub" style="margin-top:35px">Family Home</footer></main><script src="/app.js" defer></script></body></html>
