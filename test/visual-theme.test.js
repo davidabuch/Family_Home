@@ -18,3 +18,14 @@ test('visual-only design retains existing accessory and session wiring',async()=
  assert.match(app,/api\('action'/);
  assert.match(app,/permissions\[id\]/);
 });
+
+test('photographic scenes are decorative and explicitly served',async()=>{
+ const [server,html,app]=await Promise.all(['server.js','public/index.html','public/app.js'].map(p=>readFile(new URL(p,root),'utf8')));
+ for(const file of ['family-home-my-room.webp','family-home-shared-areas.webp','family-home-olivers-room.webp']){
+  assert.ok(server.includes("'/"+file+"'"),file+' allowlisted');
+  assert.ok(html.includes("'/"+file+"'"),file+' referenced');
+ }
+ assert.match(server,/image\/webp/);
+ assert.match(app,/document\.body\.dataset\.scene/);
+ assert.match(html,/pointer-events:none/);
+});
