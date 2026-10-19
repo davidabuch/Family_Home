@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.42
+
+- Keep yellow light and blue fan/shade icons colored on active white tiles, matching the HomeKit visual convention.
+- Override legacy white SVG glyph styling without changing control behavior or the approved OFF tiles.
+
 ## 0.1.41
 
 - Improve iPhone readability with larger accessory labels and statuses, tighter cards, and higher placement.
