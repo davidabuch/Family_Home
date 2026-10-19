@@ -104,11 +104,15 @@ function applyProfile(me){
   section.append(title,description,link);
   app.append(section);
  }
+ // Decorative room backdrop selection only; never changes permissions or HA controls.
+ const sceneFor=(label)=>/oliver/i.test(label)?'oliver':/shared|living|kitchen|dining|common/i.test(label)?'shared':'room';
+ const selectScene=(tab)=>{document.body.dataset.scene=sceneFor(tab?.textContent||'')};
  const first=nav.querySelector('button:not(.hide)');
- if(first){first.classList.add('active');$(first.dataset.tab)?.classList.add('active')}
+ if(first){first.classList.add('active');$(first.dataset.tab)?.classList.add('active');selectScene(first)}
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));
   document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));
+  selectScene(b);
  });
  if(me.role==='admin'){
   const menu=$('profileMenu'),link=document.createElement('a');link.href='/admin.html';link.textContent='Manage Home';link.className='btn';menu.prepend(link);
