@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.40
+
+- Improve iPhone glass translucency with thinner specular borders, clearer neutral cards and blue active states.
+- Replace broken CSS-mask tab squares with inline SVG navigation icons for dynamically generated room tabs.
+- Preserve Home Assistant accessory controls, permissions and photo backgrounds.
+
 ## 0.1.39
 
 - Add three optimized Sculptural White room photographs and frosted glass accessory tiles.
