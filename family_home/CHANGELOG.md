@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.41
+
+- Improve iPhone readability with larger accessory labels and statuses, tighter cards, and higher placement.
+- Use clearer, lower-blur glass with stronger white text contrast.
+- Use yellow light glyphs and blue fan/shade glyphs in both on and off states.
+
 ## 0.1.40
 
 - Improve iPhone glass translucency with thinner specular borders, clearer neutral cards and blue active states.
