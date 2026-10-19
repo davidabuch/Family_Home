@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.39
+
+- Add three optimized Sculptural White room photographs and frosted glass accessory tiles.
+- Update room navigation and decorate the active profile tab without changing access permissions or device commands.
+- Explicitly allowlist and serve photo assets with the correct WebP MIME type; include presentation regression checks.
+
 ## 0.1.38
 
 - Crop approved originals to full-bleed squares without borders, padding, pre-rounded corners or distortion.
