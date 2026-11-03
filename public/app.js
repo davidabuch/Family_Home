@@ -64,6 +64,18 @@ async function command(id,action,value){
   return false;
  }
 }
+async function renderAdminHome(){
+ const grid=$('adminHomeGrid');grid.replaceChildren();
+ const members=(await api('admin/users')).users.filter(u=>u.role!=='admin');
+ for(const member of members){
+  const tile=document.createElement('a');tile.className='adminHomeTile';
+  tile.href='/admin.html?member='+encodeURIComponent(member.id);
+  const name=document.createElement('strong');name.textContent=member.display_name;
+  const hint=document.createElement('small');hint.textContent=member.enabled===false?'Disabled · room settings':'Room settings';
+  tile.append(name,hint);grid.append(tile);
+ }
+ $('adminHome').classList.remove('hide');
+}
 function applyProfile(me){
  $('signedInProfile').classList.remove('hide');
  const profile=me.profile||{rooms:[]};
@@ -125,7 +137,7 @@ function applyProfile(me){
  const h=document.querySelector('h1');h.textContent=(me.display_name||me.username)+"'s Home";document.title='Family Home · '+(me.display_name||me.username);
  $('profileButton').textContent=(me.display_name||me.username).charAt(0).toUpperCase();
 }
-async function show(){const m=await api('me');csrf=m.csrf;applyProfile(m);$('login').classList.add('hide');$('app').classList.remove('hide');await refresh();setInterval(()=>{if(!document.hidden)refresh()},5000)}
+async function show(){const m=await api('me');csrf=m.csrf;applyProfile(m);$('login').classList.add('hide');$('app').classList.remove('hide');if(m.role==='admin'){try{await renderAdminHome()}catch(e){message('Family shortcuts unavailable: '+e.message)}}await refresh();setInterval(()=>{if(!document.hidden)refresh()},5000)}
 
 $('loginForm').onsubmit=async e=>{e.preventDefault();try{const m=await api('login',{method:'POST',body:JSON.stringify({username:$('user').value,password:$('pass').value})});csrf=m.csrf;$('pass').value='';await show()}catch(err){alert(err.message)}};
 $('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reload()};
