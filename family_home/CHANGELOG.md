@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.43
+
+- Add compact three-column member shortcut tiles to the administrator page.
+- Select each member's room and accessory settings directly, using their stable account ID.
+- Keep existing account management and permission enforcement unchanged.
+
+
 ## 0.1.42
 
 - Keep yellow light and blue fan/shade icons colored on active white tiles, matching the HomeKit visual convention.
