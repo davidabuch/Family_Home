@@ -66,6 +66,8 @@ async function command(id,action,value){
 }
 async function showAdminFamilyTiles(){
  const app=$('app'),nav=app.querySelector('.tabs');
+ groups={};
+ for(const old of app.querySelectorAll('.section'))old.remove();
  const section=document.createElement('section');
  section.id='familyAdmin';section.className='section active';
  const title=document.createElement('h2');title.textContent='Manage Family Members';
