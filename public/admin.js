@@ -25,7 +25,7 @@ function renderMemberTiles(){
  }
 }
 async function loadUsers(){
- const selected=$('member').value;
+ const selected=$('member').value||new URLSearchParams(location.search).get('member');
  users=(await api('admin/users')).users;
  $('users').replaceChildren();$('member').replaceChildren();$('copy').replaceChildren(option('','Start empty'));
  for(const u of users){
@@ -44,9 +44,10 @@ async function loadUsers(){
   $('member').append(option(u.id,u.display_name));
   $('copy').append(option(u.id,u.display_name));
  }
- if(selected&&users.some(u=>u.id===selected))$('member').value=selected;
+ if(selected&&users.some(u=>u.id===selected&&u.role!=='admin'))$('member').value=selected;
  renderMemberTiles();
  await loadProfile();
+ if(new URLSearchParams(location.search).has('member')&&$('member').value===selected){$('roomSettings').scrollIntoView({block:'start'})}
 }
 async function loadProfile(){
  const id=$('member').value;if(!id)return;
