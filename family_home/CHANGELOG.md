@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.44
+
+- Show compact three-column child-account settings tiles directly on the administrator's Family Home landing page.
+- Link each tile to the corresponding member's room and accessory settings without exposing controls to non-admin users.
+
+
 ## 0.1.43
 
 - Add compact three-column member shortcut tiles to the administrator page.
