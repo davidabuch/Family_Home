@@ -25,7 +25,14 @@ async function loadUsers(){
   $('member').append(option(u.id,u.display_name));
   $('copy').append(option(u.id,u.display_name));
  }
+ const requested=new URLSearchParams(location.search).get('user_id');
+ if(requested&&users.some(u=>u.id===requested)){
+  $('member').value=requested;
+ }
  await loadProfile();
+ if(requested&&users.some(u=>u.id===requested)){
+  document.querySelector('#member').scrollIntoView({block:'start'});
+ }
 }
 async function loadProfile(){
  const id=$('member').value;if(!id)return;
