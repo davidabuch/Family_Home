@@ -6,7 +6,26 @@ async function api(path,opts={}){
  const j=await r.json();if(!r.ok)throw Error(j.error||'Request failed');return j;
 }
 function option(value,label){const o=document.createElement('option');o.value=value;o.textContent=label;return o}
+function renderMemberTiles(){
+ const grid=$('memberTiles');grid.replaceChildren();
+ for(const u of users.filter(u=>u.role!=='admin')){
+  const tile=document.createElement('button');tile.type='button';tile.className='member-tile';
+  const name=document.createElement('strong');name.textContent=u.display_name;
+  const hint=document.createElement('span');hint.textContent=u.enabled===false?'Disabled · settings':'Room settings';
+  tile.append(name,hint);
+  tile.setAttribute('aria-label','Edit room settings for '+u.display_name);
+  tile.setAttribute('aria-current',String($('member').value===u.id));
+  tile.onclick=async()=>{
+   $('member').value=u.id;
+   renderMemberTiles();
+   $('roomSettings').scrollIntoView({behavior:'smooth',block:'start'});
+   try{await loadProfile();status('Editing room settings for '+u.display_name)}catch(e){status(e.message)}
+  };
+  grid.append(tile);
+ }
+}
 async function loadUsers(){
+ const selected=$('member').value;
  users=(await api('admin/users')).users;
  $('users').replaceChildren();$('member').replaceChildren();$('copy').replaceChildren(option('','Start empty'));
  for(const u of users){
@@ -25,6 +44,8 @@ async function loadUsers(){
   $('member').append(option(u.id,u.display_name));
   $('copy').append(option(u.id,u.display_name));
  }
+ if(selected&&users.some(u=>u.id===selected))$('member').value=selected;
+ renderMemberTiles();
  await loadProfile();
 }
 async function loadProfile(){
@@ -72,7 +93,7 @@ function drawRooms(){
   box.append(search,picker,add);$('rooms').append(box);
  }
 }
-$('member').onchange=()=>loadProfile().catch(e=>status(e.message));
+$('member').onchange=()=>{renderMemberTiles();loadProfile().catch(e=>status(e.message))};
 $('addRoom').onclick=()=>{const name=prompt('Room name');if(!name?.trim())return;profile.rooms.push({id:'room_'+Date.now().toString(36),name:name.trim(),devices:[]});drawRooms()};
 let saveFeedbackTimer;
 function resetSaveFeedback(){
