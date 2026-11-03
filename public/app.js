@@ -64,9 +64,41 @@ async function command(id,action,value){
   return false;
  }
 }
+async function showAdminFamilyTiles(){
+ const app=$('app'),nav=app.querySelector('.tabs');
+ const section=document.createElement('section');
+ section.id='familyAdmin';section.className='section active';
+ const title=document.createElement('h2');title.textContent='Manage Family Members';
+ const grid=document.createElement('div');grid.className='grid';
+ section.append(title,grid);app.append(section);
+ nav.classList.add('hide');
+ try{
+  const result=await api('admin/users');
+  for(const user of result.users.filter(u=>u.role!=='admin')){
+   const link=document.createElement('a');
+   link.className='tile';link.href='/admin.html?user_id='+encodeURIComponent(user.id);
+   link.style.textDecoration='none';
+   const icon=document.createElement('span');icon.className='tileIcon';icon.textContent='⌂';
+   const details=document.createElement('span');details.className='tileDetails';
+   const name=document.createElement('strong');name.textContent=user.display_name;
+   const sub=document.createElement('small');sub.textContent=user.enabled===false?'Disabled account · Manage settings':'Manage rooms & permissions';
+   details.append(name,sub);link.append(icon,details);grid.append(link);
+  }
+  if(!grid.children.length){const empty=document.createElement('p');empty.textContent='No family member accounts yet. Open Manage Home to create one.';section.append(empty)}
+ }catch(e){const error=document.createElement('p');error.textContent='Unable to load family accounts: '+e.message;section.append(error)}
+}
 function applyProfile(me){
  $('signedInProfile').classList.remove('hide');
  const profile=me.profile||{rooms:[]};
+ if(me.role==='admin'){
+  const menu=$('profileMenu');
+  const manage=document.createElement('a');manage.href='/admin.html';manage.textContent='Manage Home';manage.className='btn';menu.prepend(manage);
+  const h=document.querySelector('h1');h.textContent=(me.display_name||me.username)+"'s Home";
+  document.title='Family Home · '+(me.display_name||me.username);
+  $('profileButton').textContent=(me.display_name||me.username).charAt(0).toUpperCase();
+  void showAdminFamilyTiles();
+  return;
+ }
  permissions=Object.fromEntries(profile.rooms.flatMap(r=>r.devices.map(d=>[d.entity_id,d.actions])));
  const app=$('app'),nav=app.querySelector('.tabs');
  for(const el of [...app.querySelectorAll('.section')])el.remove();
