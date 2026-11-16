@@ -101,7 +101,7 @@ const server=http.createServer(async(req,res)=>{try{
   attempts.delete(ip);
   const created=createSession(db,user.id,{secure:true});
   await persist();
-  return json(res,200,{csrf:created.csrf,username:user.username,role:user.role},{'Set-Cookie':`fh_session=${created.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=2592000`});
+  return json(res,200,{csrf:created.csrf,username:user.username,role:user.role},{'Set-Cookie':`fh_session=${created.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=15552000`});
  }
  if(!secureRequest(req))return json(res,426,{error:'HTTPS required'});
  const session=getSession(req);if(!session)return json(res,401,{error:'Login required'});

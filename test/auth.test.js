@@ -18,7 +18,8 @@ test('sessions are hashed at rest, scoped, expiring, and revocable',()=>{
  const {token,session}=createSession(db,'alexis',{secure:true,now});
  assert.notEqual(token,session.id);assert.equal(sessionHash(token),session.id);
  assert.equal(resolveSession(db,token,now)?.user.id,'alexis');
- assert.equal(resolveSession(db,token,now+31*86400000),null);
+ assert.equal(resolveSession(db,token,now+179*86400000)?.user.id,'alexis');
+ assert.equal(resolveSession(db,token,now+180*86400000),null);
  revokeUserSessions(db,'alexis');assert.equal(resolveSession(db,token,now),null);
  const guest=createSession(db,'guest',{secure:true,now});
  assert.equal(resolveSession(db,guest.token,now+11000),null);
